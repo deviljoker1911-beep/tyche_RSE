@@ -10,16 +10,19 @@ ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 RAW="$ROOT/data/raw"
 FORCE="${1:-}"
 
-UA="Mozilla/5.0 (compatible; tyche-data-fetcher/0.1; +https://github.com/deviljoker1911-beep/tyche_RSE)"
+# SEC EDGAR requires a UA with contact info — keep it simple, no parentheses.
+UA="Tyche Research security@tyche.network"
 
 fetch() {
   local url="$1" out="$2"
+  shift 2
+  local extra=("$@")
   if [[ -f "$out" && "$FORCE" != "--force" ]]; then
     echo "  skip (exists): $(basename "$out")"
     return 0
   fi
   mkdir -p "$(dirname "$out")"
-  if curl -fsSL --retry 3 --retry-delay 2 -A "$UA" -o "$out.tmp" "$url"; then
+  if curl -fsSL --retry 3 --retry-delay 2 -A "$UA" ${extra[@]+"${extra[@]}"} -o "$out.tmp" "$url"; then
     mv "$out.tmp" "$out"
     local size; size=$(stat -f%z "$out" 2>/dev/null || stat -c%s "$out")
     echo "  ok   ($(numfmt --to=iec "$size" 2>/dev/null || echo "$size B")): $(basename "$out")"
@@ -30,25 +33,15 @@ fetch() {
   fi
 }
 
-echo "=== FRED (St Louis Fed) — macro time series ==="
+echo "=== FRED — macro time series ==="
 declare -a FRED=(
-  GDPC1            # US Real GDP
-  CPIAUCSL         # US CPI
-  DGS10            # 10y Treasury yield
-  DFF              # Fed funds rate
-  BAMLH0A0HYM2     # ICE BofA US High Yield Index OAS
-  BAMLC0A0CM       # ICE BofA US Corp Index OAS
-  TEDRATE          # TED spread (discontinued but useful history)
-  T10Y3M           # Term spread
-  DRBLACBS         # Charge-off rate, all banks
-  DRSFRMACBS       # Single family delinquency
-  USREC            # NBER recession indicator
-  UNRATE           # US unemployment
-  HYIOAS           # HY index OAS
-  ECBESTRVOLWGTTRMDMNRT  # €STR
-  IRSTCB01EZQ156N  # Euro area policy rate
-  CLVMNACSCAB1GQEA19   # Euro Area GDP
-  CP0000EZ19M086NEST   # Euro area HICP
+  GDPC1 CPIAUCSL DGS10 DFF BAMLH0A0HYM2 BAMLC0A0CM TEDRATE T10Y3M
+  DRBLACBS DRSFRMACBS USREC UNRATE
+  ECBESTRVOLWGTTRMDMNRT IRSTCB01EZQ156N CLVMNACSCAB1GQEA19 CP0000EZ19M086NEST
+  CSCICP03EZM665S    # Euro area consumer confidence
+  ECBDFR             # ECB deposit facility rate
+  T10Y2Y             # 10y-2y term spread
+  WTREGEN            # Treasury general account
 )
 for s in "${FRED[@]}"; do
   fetch "https://fred.stlouisfed.org/graph/fredgraph.csv?id=$s" "$RAW/fred/${s}.csv" || true
@@ -56,8 +49,6 @@ done
 
 echo
 echo "=== ECB Statistical Data Warehouse ==="
-# Format reference: https://data.ecb.europa.eu/help/api/data
-# Series naming: dataset/key
 declare -a ECB=(
   "BSI/M.U2.N.A.A20.A.1.U2.2240.Z01.E:euro_area_credit_to_NFCs_outstanding"
   "BSI/M.U2.N.A.A20.A.4.U2.2240.Z01.E:euro_area_NFC_loan_growth"
@@ -76,16 +67,8 @@ done
 echo
 echo "=== Eurostat (full datasets, gzipped CSV) ==="
 declare -a EUROSTAT=(
-  nama_10_gdp                 # GDP main aggregates
-  nama_10_a64                 # GVA by sector NACE (A64)
-  prc_hicp_manr               # HICP annual rates
-  ei_isen_m                   # Industrial production
-  bs_bs7_q                    # Bankruptcy declarations
-  ert_bil_eur_a               # FX rates
-  irt_lt_mcby_d               # 10y bond yields
-  sbs_sc_ovw                  # Structural business statistics
-  bd_size_r3                  # Business demography by sector
-  fbs_pension_q               # Pension/insurance balance sheets
+  nama_10_gdp nama_10_a64 prc_hicp_manr ei_isen_m bs_bs7_q ert_bil_eur_a
+  irt_lt_mcby_d sbs_sc_ovw bd_size_r3 fbs_pension_q
 )
 for ds in "${EUROSTAT[@]}"; do
   fetch "https://ec.europa.eu/eurostat/api/dissemination/sdmx/2.1/data/${ds}?format=SDMX-CSV&compressed=true" \
@@ -95,13 +78,8 @@ done
 echo
 echo "=== World Bank Open Data ==="
 declare -a WB_INDICATORS=(
-  NY.GDP.MKTP.CD               # GDP USD
-  FR.INR.RINR                  # Real interest rate
-  FS.AST.PRVT.GD.ZS            # Domestic credit to private sector / GDP
-  GFDD.SI.02                   # Bank NPL ratio
-  GFDD.SI.03                   # Bank Z-score
-  FS.AST.DOMS.GD.ZS            # Domestic credit / GDP
-  CM.MKT.TRAD.GD.ZS            # Stocks traded / GDP
+  NY.GDP.MKTP.CD FR.INR.RINR FS.AST.PRVT.GD.ZS GFDD.SI.02 GFDD.SI.03
+  FS.AST.DOMS.GD.ZS CM.MKT.TRAD.GD.ZS
 )
 for ind in "${WB_INDICATORS[@]}"; do
   fetch "https://api.worldbank.org/v2/country/all/indicator/${ind}?format=json&per_page=20000&date=2000:2025" \
@@ -109,28 +87,38 @@ for ind in "${WB_INDICATORS[@]}"; do
 done
 
 echo
-echo "=== BIS — credit to non-financial sector + debt service ratios ==="
-fetch "https://www.bis.org/statistics/full_data_sets/bis_total_credit_csv.zip" "$RAW/bis/total_credit.zip" || true
-fetch "https://www.bis.org/statistics/full_data_sets/dsr/full_BIS_DSR_csv.zip" "$RAW/bis/debt_service_ratios.zip" || true
-fetch "https://www.bis.org/statistics/full_data_sets/cbs/full_BIS_CBS_csv.zip" "$RAW/bis/consolidated_banking.zip" || true
-fetch "https://www.bis.org/statistics/full_data_sets/lbs/full_BIS_LBS_csv.zip" "$RAW/bis/locational_banking.zip" || true
-fetch "https://www.bis.org/statistics/full_data_sets/cnfs/full_BIS_CNFS_csv.zip" "$RAW/bis/credit_to_non_financial.zip" || true
+echo "=== BIS — XLSX dashboards (the bulk-zip endpoints have moved) ==="
+declare -a BIS=(
+  "totcredit/totcredit.xlsx:total_credit_to_nfs"
+  "dsr/dsr.xlsx:debt_service_ratios"
+  "eer/broad.xlsx:nominal_effective_exchange_rates"
+  "eer/narrow.xlsx:narrow_effective_exchange_rates"
+  "rpp/rpp_long.xlsx:residential_property_prices"
+  "cbs/d_a_b_a.xlsx:consolidated_banking_breakdown"
+  "lbs/d_lbs_a.xlsx:locational_banking"
+)
+for entry in "${BIS[@]}"; do
+  path="${entry%%:*}"
+  name="${entry##*:}"
+  fetch "https://www.bis.org/statistics/${path}" "$RAW/bis/${name}.xlsx" || true
+done
 
 echo
-echo "=== OECD — selected datasets via SDMX ==="
+echo "=== OECD — SDMX REST with CSV accept header ==="
 declare -a OECD=(
-  "OECD.SDD.NAD,DSD_NAMAIN10@DF_TABLE1,1.0/all?dimensionAtObservation=AllDimensions:national_accounts"
-  "OECD.SDD.STES,DSD_KEI@DF_KEI,1.0/all:key_economic_indicators"
+  "OECD.SDD.STES,DSD_KEI@DF_KEI/all:key_economic_indicators"
+  "OECD.SDD.NAD,DSD_NAMAIN1@DF_QNA/all:quarterly_national_accounts"
+  "OECD.SDD.STES,DSD_STES@DF_FINMARK/all:financial_market_trends"
 )
 for entry in "${OECD[@]}"; do
   key="${entry%%:*}"
   name="${entry##*:}"
-  fetch "https://sdmx.oecd.org/public/rest/data/${key}?format=csvfilewithlabels" "$RAW/oecd/${name}.csv" || true
+  fetch "https://sdmx.oecd.org/public/rest/data/${key}" "$RAW/oecd/${name}.csv" \
+        -H "Accept: application/vnd.sdmx.data+csv" || true
 done
 
 echo
 echo "=== Bank of England — bankstats CSV exports ==="
-# BoE Statistical Interactive Database series (no auth)
 declare -a BOE=(
   "LPMVQJW:UK_loans_to_PNFCs"
   "IUMSDOR:UK_household_secured_lending_rate"
@@ -146,46 +134,36 @@ for entry in "${BOE[@]}"; do
 done
 
 echo
-echo "=== EBA Risk Dashboard (most recent public XLSX) ==="
-# The EBA dashboard URL pattern changes per release; we fetch the catalogue page
-# and then try the most-recent known direct URL.
-fetch "https://www.eba.europa.eu/sites/default/documents/files/document_library/Risk%20Analysis%20and%20Data/Risk%20dashboard/Q4%202024/EBA%20Dashboard%20-%20Q4%202024.xlsx" \
-      "$RAW/eba/risk_dashboard_q4_2024.xlsx" || true
-fetch "https://www.eba.europa.eu/sites/default/documents/files/document_library/Risk%20Analysis%20and%20Data/Risk%20dashboard/Q3%202024/EBA%20Dashboard%20-%20Q3%202024.xlsx" \
-      "$RAW/eba/risk_dashboard_q3_2024.xlsx" || true
+echo "=== EBA Risk Dashboard — page changes per quarter, see manual fallback ==="
+echo "(Skipping; EBA URL pattern shifts each release. See data/README.md for the manual link.)"
 
 echo
-echo "=== SEC EDGAR — Financial Statement Data Sets (small slice) ==="
-# Quarterly FSDS bundles. We pull the most recent two quarters as a sample.
+echo "=== SEC EDGAR — Financial Statement Data Sets ==="
+# The FSDS archive is now at /files/dera/data/financial-statement-data-sets/.
+# We pull the most recent two quarters as a calibration sample (~250 MB total).
 fetch "https://www.sec.gov/files/dera/data/financial-statement-data-sets/2024q4.zip" \
       "$RAW/sec_edgar/2024q4.zip" || true
 fetch "https://www.sec.gov/files/dera/data/financial-statement-data-sets/2024q3.zip" \
       "$RAW/sec_edgar/2024q3.zip" || true
 
 echo
-echo "=== Loan-level samples ==="
-# Lending Club historical data — Wharton mirror (academic, no auth)
-fetch "https://files.consumerfinance.gov/ccdb/complaints.csv.zip" \
-      "$RAW/loan_level/cfpb_consumer_complaints.csv.zip" || true
-
-# Freddie Mac sample loan-level data — sample dataset is publicly downloadable
-fetch "https://www.freddiemac.com/fmac-resources/research/pdf/historical-loan-level-data.pdf" \
-      "$RAW/loan_level/freddie_mac_methodology.pdf" || true
-
-echo
-echo "=== Public PDFs — default & recovery studies ==="
-# Moody's annual default study and S&P annual default reports — public PDFs.
-# URLs change yearly; try a known historical path.
+echo "=== Public credit & default PDFs ==="
+# Moody's / S&P annual default studies — public PDFs. URL paths shift; we try
+# a couple of known patterns.
 fetch "https://www.moodys.com/sites/products/ProductAttachments/2023%20Default%20Study.pdf" \
       "$RAW/credit_pdfs/moodys_2023_default_study.pdf" || true
+fetch "https://www.spglobal.com/_assets/documents/ratings/research/101510568.pdf" \
+      "$RAW/credit_pdfs/sp_2023_default_study.pdf" || true
 
-# IMF Global Financial Stability Report (most recent autumn edition)
+# IMF Global Financial Stability Report
 fetch "https://www.imf.org/-/media/Files/Publications/GFSR/2024/October/English/text.ashx" \
       "$RAW/credit_pdfs/imf_gfsr_2024_oct.pdf" || true
 
-# ECB Financial Stability Review
-fetch "https://www.ecb.europa.eu/pub/financial-stability/fsr/html/ecb.fsr202411~9c5d04ca7d.en.html" \
-      "$RAW/credit_pdfs/ecb_fsr_2024_nov.html" || true
+echo
+echo "=== Lightweight loan-level samples ==="
+echo "(Skipping bulk loan-level — Lending Club / HMDA / Freddie Mac all need accounts."
+echo " The SEC FSDS pulled above contains balance-sheet data for thousands of US"
+echo " public companies, which is the closest free proxy for issuer-level financials.)"
 
 echo
 echo "=== Done. ==="
