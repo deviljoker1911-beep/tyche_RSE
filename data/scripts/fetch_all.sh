@@ -160,10 +160,18 @@ fetch "https://www.imf.org/-/media/Files/Publications/GFSR/2024/October/English/
       "$RAW/credit_pdfs/imf_gfsr_2024_oct.pdf" || true
 
 echo
-echo "=== Lightweight loan-level samples ==="
-echo "(Skipping bulk loan-level — Lending Club / HMDA / Freddie Mac all need accounts."
-echo " The SEC FSDS pulled above contains balance-sheet data for thousands of US"
-echo " public companies, which is the closest free proxy for issuer-level financials.)"
+echo "=== Loan-level / consumer-finance samples ==="
+# CFPB Consumer Complaints database — large (~1.8 GB compressed) but it's the
+# only fully public, no-auth, daily-refreshed dataset of US consumer-finance
+# complaints with product / issue / company / state / response fields. Useful
+# for stressing the schema, building UI fixtures, and doing NLP on dispute
+# narratives. Set TYCHE_SKIP_BIG=1 to skip it on slow networks.
+if [[ "${TYCHE_SKIP_BIG:-0}" != "1" ]]; then
+  fetch "https://files.consumerfinance.gov/ccdb/complaints.csv.zip" \
+        "$RAW/loan_level/cfpb_consumer_complaints.csv.zip" || true
+else
+  echo "  TYCHE_SKIP_BIG=1 — skipping CFPB complaints zip (~1.8 GB)"
+fi
 
 echo
 echo "=== Done. ==="

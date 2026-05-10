@@ -45,6 +45,36 @@ After both scripts complete, `data/MANIFEST.md` lists every file with its
 size. Some endpoints will fail intermittently (sites change layout); rerun
 the fetcher to retry.
 
+## Loan-level: CFPB Consumer Complaints
+
+`data/raw/loan_level/cfpb_consumer_complaints.csv.zip` (~1.8 GB compressed,
+multi-GB extracted) is the public Consumer Financial Protection Bureau
+complaints database, refreshed daily. Schema columns:
+
+- `Date received`, `Date sent to company`
+- `Product`, `Sub-product`, `Issue`, `Sub-issue`
+- `Consumer complaint narrative` (free text)
+- `Company`, `State`, `ZIP code`, `Tags`
+- `Submitted via`, `Company response to consumer`, `Timely response?`,
+  `Consumer disputed?`, `Complaint ID`
+
+This is **not** loan-level performance data (it carries no PD, LGD, or
+exposure). It is useful for:
+
+- **Schema / pipeline stress-testing** — millions of rows, real-world
+  malformed strings; helpful for proving Tyche's ingestion path holds up
+  under volume.
+- **NLP fixtures** — the narrative column is the largest free-text
+  consumer-finance corpus available without licensing. Useful for the
+  Phase-2 LLM analyst pipeline against real dispute language.
+- **UI fixtures** — generate realistic-looking issuer / sector / state
+  breakdowns for the dashboard from real distributions.
+- **Benchmarking ingestion latency** — if Tyche can ingest, hash, and
+  attest 4M+ records, it can handle any single firm's book.
+
+It's behind a `TYCHE_SKIP_BIG=1` env var in the fetch script for users
+on slow networks.
+
 ## What's *not* in here, and why
 
 | Source | Why it's not auto-downloaded |
