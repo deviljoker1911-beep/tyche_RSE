@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --color-canvas: #f8f7f5;
+    --color-ink: #0a1322;
+    --color-navy: #0f1b2d;
+    --color-ochre: #b15a2b;
+  }
+
+  html.dark {
+    --color-canvas: #0a1322;
+    --color-ink: #f5f7fa;
+  }
+
+  html,
+  body {
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: "Inter", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::selection {
+    background-color: rgba(177, 90, 43, 0.2);
+  }
+}

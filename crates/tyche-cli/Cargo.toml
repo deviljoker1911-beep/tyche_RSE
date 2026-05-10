@@ -1,0 +1,34 @@
+[package]
+name = "tyche-cli"
+description = "CLI front-end for the Tyche simulation core."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+readme = "README.md"
+
+[lints]
+workspace = true
+
+[[bin]]
+name = "tyche"
+path = "src/main.rs"
+
+[dependencies]
+tyche-types = { workspace = true }
+tyche-crypto = { workspace = true }
+tyche-sim = { workspace = true }
+tyche-attest = { workspace = true }
+tyche-fed = { workspace = true }
+clap = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+ed25519-dalek = { workspace = true }
+rand = { workspace = true }
+rand_core = { workspace = true }
+hex = { workspace = true }
+anyhow = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }

@@ -1,0 +1,23 @@
+[package]
+name = "tyche-py"
+description = "Python bindings to the Tyche simulation core via PyO3."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+readme = "README.md"
+
+[lints]
+workspace = true
+
+[lib]
+name = "tyche_sim"
+crate-type = ["cdylib"]
+
+[dependencies]
+tyche-types = { workspace = true }
+tyche-sim = { workspace = true }
+serde_json = { workspace = true }
+pyo3 = { workspace = true }

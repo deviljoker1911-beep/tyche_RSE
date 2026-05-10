@@ -1,0 +1,58 @@
+# Rust
+/target
+**/*.rs.bk
+Cargo.lock.bak
+
+# WASM build artifacts
+/crates/tyche-wasm/pkg
+/apps/web/public/wasm
+
+# Python (research notebooks)
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.venv/
+.python-version
+*.egg-info/
+
+# Node / pnpm
+node_modules
+.next/
+.turbo/
+dist/
+out/
+*.tsbuildinfo
+pnpm-debug.log*
+
+# Foundry
+/contracts/out
+/contracts/cache
+/contracts/broadcast
+/contracts/.gas-snapshot.tmp
+
+# Editors / OS
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.swp
+
+# Local config
+.env
+.env.*
+!.env.example
+
+# Claude Code per-project settings (local only)
+.claude/
+
+# Coverage
+/coverage
+/lcov.info
+
+# Nix
+result
+result-*
+
+# Keys (developer-local; never commit production keys)
+/keys/*.key
+!/keys/.gitkeep

@@ -1,0 +1,25 @@
+name: web
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    name: pnpm build & test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @tyche/web typecheck
+      - run: pnpm --filter @tyche/web lint
+      - run: pnpm --filter @tyche/web test
+      - run: pnpm --filter @tyche/web build

@@ -1,0 +1,32 @@
+[package]
+name = "tyche-wasm"
+description = "WASM bindings to the Tyche simulation and attestation core."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+readme = "README.md"
+
+[lints]
+workspace = true
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+tyche-types = { workspace = true }
+tyche-sim = { workspace = true }
+tyche-attest = { workspace = true }
+tyche-crypto = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+serde-wasm-bindgen = { workspace = true }
+wasm-bindgen = { workspace = true }
+js-sys = { workspace = true }
+console_error_panic_hook = { workspace = true }
+ed25519-dalek = { workspace = true }
+rand = { workspace = true }
+rand_core = { workspace = true }
+hex = { workspace = true }

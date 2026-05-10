@@ -1,0 +1,19 @@
+{
+  "name": "tyche",
+  "private": true,
+  "version": "0.1.0",
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=20.11",
+    "pnpm": ">=9"
+  },
+  "packageManager": "pnpm@9.12.0",
+  "scripts": {
+    "dev": "pnpm --filter @tyche/web dev",
+    "build": "pnpm --filter @tyche/web build",
+    "lint": "pnpm --recursive run lint",
+    "typecheck": "pnpm --recursive run typecheck",
+    "test": "pnpm --recursive run test",
+    "format": "pnpm --recursive run format"
+  }
+}

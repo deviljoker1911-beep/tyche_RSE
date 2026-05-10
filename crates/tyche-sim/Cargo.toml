@@ -1,0 +1,36 @@
+[package]
+name = "tyche-sim"
+description = "Monte Carlo credit simulation engine for the Tyche stack."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+readme = "README.md"
+
+[lints]
+workspace = true
+
+[features]
+default = []
+qmc = []
+is = []
+gpu = []
+
+[dependencies]
+tyche-types = { workspace = true }
+serde = { workspace = true }
+rand = { workspace = true }
+rand_chacha = { workspace = true }
+ndarray = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+
+[dev-dependencies]
+proptest = { workspace = true }
+criterion = { workspace = true }
+
+[[bench]]
+name = "simulate_bench"
+harness = false

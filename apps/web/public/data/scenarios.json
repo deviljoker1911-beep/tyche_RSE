@@ -1,0 +1,73 @@
+[
+  {
+    "scenario_id": "baseline_2026",
+    "name": "Baseline 2026",
+    "gdp_shock": -0.005,
+    "rate_shock_bps": 0.0,
+    "sector_shocks": {}
+  },
+  {
+    "scenario_id": "stagflation_severe",
+    "name": "Stagflation severe",
+    "gdp_shock": -0.04,
+    "rate_shock_bps": 250.0,
+    "sector_shocks": {
+      "energy": {
+        "ebitda_shock": -0.18,
+        "asset_shock": -0.1
+      },
+      "consumer": {
+        "ebitda_shock": -0.1,
+        "asset_shock": -0.06
+      },
+      "real_estate": {
+        "ebitda_shock": -0.12,
+        "asset_shock": -0.2
+      }
+    }
+  },
+  {
+    "scenario_id": "climate_transition_2030",
+    "name": "Climate transition 2030",
+    "gdp_shock": -0.015,
+    "rate_shock_bps": 50.0,
+    "sector_shocks": {
+      "energy": {
+        "ebitda_shock": -0.3,
+        "asset_shock": -0.4
+      },
+      "materials": {
+        "ebitda_shock": -0.12,
+        "asset_shock": -0.1
+      },
+      "utilities": {
+        "ebitda_shock": -0.05,
+        "asset_shock": 0.05
+      },
+      "technology": {
+        "ebitda_shock": 0.02,
+        "asset_shock": 0.0
+      }
+    }
+  },
+  {
+    "scenario_id": "geopolitical_eu_break",
+    "name": "Geopolitical: EU fragmentation",
+    "gdp_shock": -0.06,
+    "rate_shock_bps": 350.0,
+    "sector_shocks": {
+      "financials": {
+        "ebitda_shock": -0.2,
+        "asset_shock": -0.15
+      },
+      "industrials": {
+        "ebitda_shock": -0.18,
+        "asset_shock": -0.1
+      },
+      "telecom": {
+        "ebitda_shock": -0.05,
+        "asset_shock": -0.05
+      }
+    }
+  }
+]
