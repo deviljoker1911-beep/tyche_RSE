@@ -56,3 +56,10 @@ result-*
 # Keys (developer-local; never commit production keys)
 /keys/*.key
 !/keys/.gitkeep
+
+# Bulk public datasets — large, regenerable via data/scripts/fetch_all.sh
+/data/raw/*
+/data/processed/*
+/data/MANIFEST.md
+!/data/raw/.gitkeep
+!/data/processed/.gitkeep
