@@ -1,0 +1,29 @@
+{
+  "_notes": [
+    "Public administration (O), education (P), household activities (T),",
+    "and extra-territorial organisations (U) are excluded \u2014 private credit",
+    "does not lend to these sectors at meaningful scale.",
+    "NACE J (information+communication) is mapped to telecom; in a",
+    "European mid-market portfolio J is dominated by telcos. Pure tech",
+    "lending is captured separately via the 'technology' bucket (which",
+    "remains 0 here because Eurostat A21 does not split it from J)."
+  ],
+  "generated_from": "data/scripts/calibrate/sectors.py",
+  "geo": "EU27_2020",
+  "source": "Eurostat NACE A64 gross value added (chain-linked \u20ac 2005)",
+  "version": "v0.1.0-calibrated",
+  "weights": {
+    "consumer": 0.175,
+    "energy": 0.0,
+    "financials": 0.054,
+    "healthcare": 0.0768,
+    "industrials": 0.3,
+    "materials": 0.003,
+    "other": 0.1661,
+    "real_estate": 0.1153,
+    "technology": 0.0,
+    "telecom": 0.0919,
+    "utilities": 0.0179
+  },
+  "year": 2022
+}

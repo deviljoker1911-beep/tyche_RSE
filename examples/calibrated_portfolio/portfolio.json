@@ -1,0 +1,1063 @@
+{
+  "firm_id": "F-AURIC-CAPITAL-CALIBRATED",
+  "as_of": "2026-03-31",
+  "loans": [
+    {
+      "loan_id": "L-001",
+      "issuer": "I-001",
+      "sector": "industrials",
+      "geography": "nordics",
+      "seniority": "senior_secured",
+      "principal": 35323038.39,
+      "coupon": 0.1037,
+      "maturity_years": 4.31,
+      "leverage": 4.12,
+      "asset_volatility": 0.308,
+      "covenants": [
+        {
+          "name": "net_leverage",
+          "threshold": 5.5,
+          "direction": "leq_threshold",
+          "cushion": 0.182
+        }
+      ],
+      "collateral_coverage": 0.84
+    },
+    {
+      "loan_id": "L-002",
+      "issuer": "I-001",
+      "sector": "other",
+      "geography": "uk",
+      "seniority": "second_lien",
+      "principal": 71508183.53,
+      "coupon": 0.0866,
+      "maturity_years": 3.1,
+      "leverage": 8.4,
+      "asset_volatility": 0.356,
+      "covenants": [
+        {
+          "name": "net_leverage",
+          "threshold": 5.5,
+          "direction": "leq_threshold",
+          "cushion": 0.143
+        }
+      ],
+      "collateral_coverage": 1.394
+    },
+    {
+      "loan_id": "L-003",
+      "issuer": "I-002",
+      "sector": "consumer",
+      "geography": "nordics",
+      "seniority": "second_lien",
+      "principal": 75861029.33,
+      "coupon": 0.1112,
+      "maturity_years": 4.93,
+      "leverage": 10.81,
+      "asset_volatility": 0.293,
+      "covenants": [
+        {
+          "name": "net_leverage",
+          "threshold": 5.5,
+          "direction": "leq_threshold",
+          "cushion": 0.249
+        }
+      ],
+      "collateral_coverage": 0.832
+    },
+    {
+      "loan_id": "L-004",
+      "issuer": "I-002",
+      "sector": "other",
+      "geography": "eu_periphery",
+      "seniority": "senior_unsecured",
+      "principal": 58501137.68,
+      "coupon": 0.1275,
+      "maturity_years": 5.7,
+      "leverage": 3.17,
+      "asset_volatility": 0.304,
+      "covenants": [
+        {
+          "name": "net_leverage",
+          "threshold": 5.5,
+          "direction": "leq_threshold",
+          "cushion": 0.313
+        }
+      ],
+      "collateral_coverage": 1.068
+    },
+    {
+      "loan_id": "L-005",
+      "issuer": "I-003",
+      "sector": "industrials",
+      "geography": "uk",
+      "seniority": "mezzanine",
+      "principal": 51015642.25,
+      "coupon": 0.0986,
+      "maturity_years": 6.8,
+      "leverage": 12.22,
+      "asset_volatility": 0.319,
+      "covenants": [
+        {
+          "name": "net_leverage",
+          "threshold": 5.5,
+          "direction": "leq_threshold",
+          "cushion": 0.124
+        }
+      ],
+      "collateral_coverage": 1.256
+    },
+    {
+      "loan_id": "L-006",
+      "issuer": "I-003",
+      "sector": "industrials",
+      "geography": "eu_core",
+      "seniority": "mezzanine",
+      "principal": 57802398.16,
+      "coupon": 0.0843,
+      "maturity_years": 5.58,
+      "leverage": 0.68,
+      "asset_volatility": 0.324,
+      "covenants": [
+        {
+          "name": "net_leverage",
+          "threshold": 5.5,
+          "direction": "leq_threshold",
+          "cushion": 0.091
+        }
+      ],
+      "collateral_coverage": 1.542
+    },
+    {
+      "loan_id": "L-007",
+      "issuer": "I-004",
+      "sector": "industrials",
+      "geography": "uk",
+      "seniority": "senior_unsecured",
+      "principal": 10615403.1,
+      "coupon": 0.1006,
+      "maturity_years": 3.22,
+      "leverage": 7.39,
+      "asset_volatility": 0.264,
+      "covenants": [
+        {
+          "name": "net_leverage",
+          "threshold": 5.5,
+          "direction": "leq_threshold",
+          "cushion": 0.239
+        }
+      ],
+      "collateral_coverage": 1.042
+    },
+    {
+      "loan_id": "L-008",
+      "issuer": "I-004",
+      "sector": "consumer",
+      "geography": "uk",
+      "seniority": "senior_secured",
+      "principal": 30021260.22,
+      "coupon": 0.0809,
+      "maturity_years": 3.93,
+      "leverage": 6.0,
+      "asset_volatility": 0.332,
+      "covenants": [
+        {
+          "name": "net_leverage",
+          "threshold": 5.5,
+          "direction": "leq_threshold",
+          "cushion": 0.223
+        }
+      ],
+      "collateral_coverage": 1.184
+    },
+    {
+      "loan_id": "L-009",
+      "issuer": "I-005",
+      "sector": "other",
+      "geography": "switzerland",
+      "seniority": "senior_secured",
+      "principal": 62342022.27,
+      "coupon": 0.1152,
+      "maturity_years": 6.48,
+      "leverage": 7.0,
+      "asset_volatility": 0.275,
+      "covenants": [
+        {
+          "name": "net_leverage",
+          "threshold": 5.5,
+          "direction": "leq_threshold",
+          "cushion": 0.2
+        }
+      ],
+      "collateral_coverage": 1.441
+    },
+    {
+      "loan_id": "L-010",
+      "issuer": "I-005",
+      "sector": "consumer",
+      "geography": "uk",
+      "seniority": "subordinated",
+      "principal": 68846157.04,
+      "coupon": 0.1109,
+      "maturity_years": 4.4,
+      "leverage": 6.22,
+      "asset_volatility": 0.346,
+      "covenants": [
+        {
+          "name": "net_leverage",
+          "threshold": 5.5,
+          "direction": "leq_threshold",
+          "cushion": 0.295
+        }
+      ],
+      "collateral_coverage": 1.292
+    },
+    {
+      "loan_id": "L-011",
+      "issuer": "I-006",
+      "sector": "real_estate",
+      "geography": "eu_periphery",
+      "seniority": "senior_secured",
+      "principal": 32534794.68,
+      "coupon": 0.119,
+      "maturity_years": 4.25,
+      "leverage": 1.93,
+      "asset_volatility": 0.258,
+      "covenants": [
+        {
+          "name": "net_leverage",
+          "threshold": 5.5,
+          "direction": "leq_threshold",
+          "cushion": 0.144
+        }
+      ],
+      "collateral_coverage": 0.977
+    },
+    {
+      "loan_id": "L-012",
+      "issuer": "I-006",
+      "sector": "real_estate",
+      "geography": "eu_periphery",
+      "seniority": "second_lien",
+      "principal": 53705932.28,
+      "coupon": 0.0992,
+      "maturity_years": 4.45,
+      "leverage": 1.46,
+      "asset_volatility": 0.263,
+      "covenants": [
+        {
+          "name": "net_leverage",
+          "threshold": 5.5,
+          "direction": "leq_threshold",
+          "cushion": 0.126
+        }
+      ],
+      "collateral_coverage": 1.029
+    },
+    {
+      "loan_id": "L-013",
+      "issuer": "I-007",
+      "sector": "real_estate",
+      "geography": "eu_core",
+      "seniority": "second_lien",
+      "principal": 60927076.77,
+      "coupon": 0.0765,
+      "maturity_years": 3.65,
+      "leverage": 2.11,
+      "asset_volatility": 0.363,
+      "covenants": [
+        {
+          "name": "net_leverage",
+          "threshold": 5.5,
+          "direction": "leq_threshold",
+          "cushion": 0.17
+        }
+      ],
+      "collateral_coverage": 1.513
+    },
+    {
+      "loan_id": "L-014",
+      "issuer": "I-007",
+      "sector": "real_estate",
+      "geography": "eu_periphery",
+      "seniority": "senior_unsecured",
+      "principal": 50444694.57,
+      "coupon": 0.0989,
+      "maturity_years": 4.4,
+      "leverage": 4.24,
+      "asset_volatility": 0.382,
+      "covenants": [
+        {
+          "name": "net_leverage",
+          "threshold": 5.5,
+          "direction": "leq_threshold",
+          "cushion": 0.313
+        }
+      ],
+      "collateral_coverage": 0.882
+    },
+    {
+      "loan_id": "L-015",
+      "issuer": "I-008",
+      "sector": "industrials",
+      "geography": "eu_core",
+      "seniority": "second_lien",
+      "principal": 70067280.67,
+      "coupon": 0.0976,
+      "maturity_years": 4.61,
+      "leverage": 6.93,
+      "asset_volatility": 0.272,
+      "covenants": [
+        {
+          "name": "net_leverage",
+          "threshold": 5.5,
+          "direction": "leq_threshold",
+          "cushion": 0.15
+        }
+      ],
+      "collateral_coverage": 1.497
+    },
+    {
+      "loan_id": "L-016",
+      "issuer": "I-008",
+      "sector": "other",
+      "geography": "eu_core",
+      "seniority": "senior_unsecured",
+      "principal": 52253966.37,
+      "coupon": 0.1135,
+      "maturity_years": 5.14,
+      "leverage": 2.11,
+      "asset_volatility": 0.36,
+      "covenants": [
+        {
+          "name": "net_leverage",
+          "threshold": 5.5,
+          "direction": "leq_threshold",
+          "cushion": 0.252
+        }
+      ],
+      "collateral_coverage": 1.006
+    },
+    {
+      "loan_id": "L-017",
+      "issuer": "I-009",
+      "sector": "real_estate",
+      "geography": "eu_periphery",
+      "seniority": "senior_secured",
+      "principal": 27119172.23,
+      "coupon": 0.1276,
+      "maturity_years": 6.87,
+      "leverage": 6.71,
+      "asset_volatility": 0.338,
+      "covenants": [
+        {
+          "name": "net_leverage",
+          "threshold": 5.5,
+          "direction": "leq_threshold",
+          "cushion": 0.223
+        }
+      ],
+      "collateral_coverage": 1.582
+    },
+    {
+      "loan_id": "L-018",
+      "issuer": "I-009",
+      "sector": "industrials",
+      "geography": "eu_periphery",
+      "seniority": "senior_unsecured",
+      "principal": 18180837.77,
+      "coupon": 0.1291,
+      "maturity_years": 5.15,
+      "leverage": 1.67,
+      "asset_volatility": 0.358,
+      "covenants": [
+        {
+          "name": "net_leverage",
+          "threshold": 5.5,
+          "direction": "leq_threshold",
+          "cushion": 0.25
+        }
+      ],
+      "collateral_coverage": 0.962
+    },
+    {
+      "loan_id": "L-019",
+      "issuer": "I-010",
+      "sector": "other",
+      "geography": "uk",
+      "seniority": "senior_unsecured",
+      "principal": 29836744.29,
+      "coupon": 0.0877,
+      "maturity_years": 6.05,
+      "leverage": 10.31,
+      "asset_volatility": 0.361,
+      "covenants": [
+        {
+          "name": "net_leverage",
+          "threshold": 5.5,
+          "direction": "leq_threshold",
+          "cushion": 0.244
+        }
+      ],
+      "collateral_coverage": 1.12
+    },
+    {
+      "loan_id": "L-020",
+      "issuer": "I-010",
+      "sector": "other",
+      "geography": "eu_periphery",
+      "seniority": "senior_secured",
+      "principal": 71556472.85,
+      "coupon": 0.1159,
+      "maturity_years": 6.57,
+      "leverage": 9.81,
+      "asset_volatility": 0.397,
+      "covenants": [
+        {
+          "name": "net_leverage",
+          "threshold": 5.5,
+          "direction": "leq_threshold",
+          "cushion": 0.156
+        }
+      ],
+      "collateral_coverage": 0.997
+    },
+    {
+      "loan_id": "L-021",
+      "issuer": "I-011",
+      "sector": "consumer",
+      "geography": "nordics",
+      "seniority": "senior_secured",
+      "principal": 78705323.47,
+      "coupon": 0.0987,
+      "maturity_years": 6.79,
+      "leverage": 2.54,
+      "asset_volatility": 0.314,
+      "covenants": [
+        {
+          "name": "net_leverage",
+          "threshold": 5.5,
+          "direction": "leq_threshold",
+          "cushion": 0.177
+        }
+      ],
+      "collateral_coverage": 1.599
+    },
+    {
+      "loan_id": "L-022",
+      "issuer": "I-011",
+      "sector": "industrials",
+      "geography": "eu_core",
+      "seniority": "subordinated",
+      "principal": 10797323.18,
+      "coupon": 0.1075,
+      "maturity_years": 3.19,
+      "leverage": 3.29,
+      "asset_volatility": 0.277,
+      "covenants": [
+        {
+          "name": "net_leverage",
+          "threshold": 5.5,
+          "direction": "leq_threshold",
+          "cushion": 0.204
+        }
+      ],
+      "collateral_coverage": 1.393
+    },
+    {
+      "loan_id": "L-023",
+      "issuer": "I-012",
+      "sector": "other",
+      "geography": "uk",
+      "seniority": "senior_secured",
+      "principal": 58351639.17,
+      "coupon": 0.0972,
+      "maturity_years": 3.67,
+      "leverage": 3.08,
+      "asset_volatility": 0.368,
+      "covenants": [
+        {
+          "name": "net_leverage",
+          "threshold": 5.5,
+          "direction": "leq_threshold",
+          "cushion": 0.105
+        }
+      ],
+      "collateral_coverage": 1.482
+    },
+    {
+      "loan_id": "L-024",
+      "issuer": "I-012",
+      "sector": "industrials",
+      "geography": "nordics",
+      "seniority": "senior_secured",
+      "principal": 34888771.25,
+      "coupon": 0.0831,
+      "maturity_years": 5.96,
+      "leverage": 3.59,
+      "asset_volatility": 0.279,
+      "covenants": [
+        {
+          "name": "net_leverage",
+          "threshold": 5.5,
+          "direction": "leq_threshold",
+          "cushion": 0.102
+        }
+      ],
+      "collateral_coverage": 1.568
+    },
+    {
+      "loan_id": "L-025",
+      "issuer": "I-013",
+      "sector": "other",
+      "geography": "switzerland",
+      "seniority": "subordinated",
+      "principal": 70217016.89,
+      "coupon": 0.0981,
+      "maturity_years": 4.68,
+      "leverage": 1.62,
+      "asset_volatility": 0.335,
+      "covenants": [
+        {
+          "name": "net_leverage",
+          "threshold": 5.5,
+          "direction": "leq_threshold",
+          "cushion": 0.199
+        }
+      ],
+      "collateral_coverage": 1.281
+    },
+    {
+      "loan_id": "L-026",
+      "issuer": "I-013",
+      "sector": "telecom",
+      "geography": "switzerland",
+      "seniority": "senior_secured",
+      "principal": 40521224.77,
+      "coupon": 0.111,
+      "maturity_years": 3.02,
+      "leverage": 5.9,
+      "asset_volatility": 0.276,
+      "covenants": [
+        {
+          "name": "net_leverage",
+          "threshold": 5.5,
+          "direction": "leq_threshold",
+          "cushion": 0.155
+        }
+      ],
+      "collateral_coverage": 1.482
+    },
+    {
+      "loan_id": "L-027",
+      "issuer": "I-014",
+      "sector": "real_estate",
+      "geography": "eu_periphery",
+      "seniority": "senior_secured",
+      "principal": 53010611.86,
+      "coupon": 0.0918,
+      "maturity_years": 6.19,
+      "leverage": 2.34,
+      "asset_volatility": 0.252,
+      "covenants": [
+        {
+          "name": "net_leverage",
+          "threshold": 5.5,
+          "direction": "leq_threshold",
+          "cushion": 0.207
+        }
+      ],
+      "collateral_coverage": 0.818
+    },
+    {
+      "loan_id": "L-028",
+      "issuer": "I-014",
+      "sector": "healthcare",
+      "geography": "eu_core",
+      "seniority": "senior_secured",
+      "principal": 23943299.16,
+      "coupon": 0.1014,
+      "maturity_years": 3.87,
+      "leverage": 2.91,
+      "asset_volatility": 0.274,
+      "covenants": [
+        {
+          "name": "net_leverage",
+          "threshold": 5.5,
+          "direction": "leq_threshold",
+          "cushion": 0.107
+        }
+      ],
+      "collateral_coverage": 1.458
+    },
+    {
+      "loan_id": "L-029",
+      "issuer": "I-015",
+      "sector": "industrials",
+      "geography": "uk",
+      "seniority": "senior_secured",
+      "principal": 37090505.25,
+      "coupon": 0.0988,
+      "maturity_years": 5.04,
+      "leverage": 4.28,
+      "asset_volatility": 0.361,
+      "covenants": [
+        {
+          "name": "net_leverage",
+          "threshold": 5.5,
+          "direction": "leq_threshold",
+          "cushion": 0.095
+        }
+      ],
+      "collateral_coverage": 0.842
+    },
+    {
+      "loan_id": "L-030",
+      "issuer": "I-015",
+      "sector": "industrials",
+      "geography": "eu_core",
+      "seniority": "senior_secured",
+      "principal": 10643925.24,
+      "coupon": 0.093,
+      "maturity_years": 6.94,
+      "leverage": 2.77,
+      "asset_volatility": 0.336,
+      "covenants": [
+        {
+          "name": "net_leverage",
+          "threshold": 5.5,
+          "direction": "leq_threshold",
+          "cushion": 0.172
+        }
+      ],
+      "collateral_coverage": 1.196
+    },
+    {
+      "loan_id": "L-031",
+      "issuer": "I-016",
+      "sector": "healthcare",
+      "geography": "eu_core",
+      "seniority": "senior_unsecured",
+      "principal": 59466344.83,
+      "coupon": 0.0841,
+      "maturity_years": 4.11,
+      "leverage": 1.79,
+      "asset_volatility": 0.26,
+      "covenants": [
+        {
+          "name": "net_leverage",
+          "threshold": 5.5,
+          "direction": "leq_threshold",
+          "cushion": 0.1
+        }
+      ],
+      "collateral_coverage": 0.898
+    },
+    {
+      "loan_id": "L-032",
+      "issuer": "I-016",
+      "sector": "other",
+      "geography": "eu_core",
+      "seniority": "second_lien",
+      "principal": 32229018.69,
+      "coupon": 0.1035,
+      "maturity_years": 3.32,
+      "leverage": 0.69,
+      "asset_volatility": 0.38,
+      "covenants": [
+        {
+          "name": "net_leverage",
+          "threshold": 5.5,
+          "direction": "leq_threshold",
+          "cushion": 0.194
+        }
+      ],
+      "collateral_coverage": 1.235
+    },
+    {
+      "loan_id": "L-033",
+      "issuer": "I-017",
+      "sector": "consumer",
+      "geography": "nordics",
+      "seniority": "second_lien",
+      "principal": 49599833.5,
+      "coupon": 0.0533,
+      "maturity_years": 6.3,
+      "leverage": 7.47,
+      "asset_volatility": 0.343,
+      "covenants": [
+        {
+          "name": "net_leverage",
+          "threshold": 5.5,
+          "direction": "leq_threshold",
+          "cushion": 0.25
+        }
+      ],
+      "collateral_coverage": 1.084
+    },
+    {
+      "loan_id": "L-034",
+      "issuer": "I-017",
+      "sector": "other",
+      "geography": "eu_core",
+      "seniority": "senior_secured",
+      "principal": 65294963.22,
+      "coupon": 0.0945,
+      "maturity_years": 6.78,
+      "leverage": 3.94,
+      "asset_volatility": 0.27,
+      "covenants": [
+        {
+          "name": "net_leverage",
+          "threshold": 5.5,
+          "direction": "leq_threshold",
+          "cushion": 0.086
+        }
+      ],
+      "collateral_coverage": 1.396
+    },
+    {
+      "loan_id": "L-035",
+      "issuer": "I-018",
+      "sector": "industrials",
+      "geography": "eu_core",
+      "seniority": "senior_secured",
+      "principal": 10617930.83,
+      "coupon": 0.1164,
+      "maturity_years": 3.11,
+      "leverage": 0.54,
+      "asset_volatility": 0.314,
+      "covenants": [
+        {
+          "name": "net_leverage",
+          "threshold": 5.5,
+          "direction": "leq_threshold",
+          "cushion": 0.228
+        }
+      ],
+      "collateral_coverage": 0.982
+    },
+    {
+      "loan_id": "L-036",
+      "issuer": "I-018",
+      "sector": "industrials",
+      "geography": "uk",
+      "seniority": "senior_secured",
+      "principal": 78143075.94,
+      "coupon": 0.0725,
+      "maturity_years": 4.56,
+      "leverage": 0.43,
+      "asset_volatility": 0.32,
+      "covenants": [
+        {
+          "name": "net_leverage",
+          "threshold": 5.5,
+          "direction": "leq_threshold",
+          "cushion": 0.191
+        }
+      ],
+      "collateral_coverage": 1.356
+    },
+    {
+      "loan_id": "L-037",
+      "issuer": "I-019",
+      "sector": "healthcare",
+      "geography": "eu_core",
+      "seniority": "second_lien",
+      "principal": 31323338.6,
+      "coupon": 0.0816,
+      "maturity_years": 5.66,
+      "leverage": 7.73,
+      "asset_volatility": 0.322,
+      "covenants": [
+        {
+          "name": "net_leverage",
+          "threshold": 5.5,
+          "direction": "leq_threshold",
+          "cushion": 0.193
+        }
+      ],
+      "collateral_coverage": 1.411
+    },
+    {
+      "loan_id": "L-038",
+      "issuer": "I-019",
+      "sector": "telecom",
+      "geography": "eu_core",
+      "seniority": "senior_secured",
+      "principal": 58571632.19,
+      "coupon": 0.1389,
+      "maturity_years": 3.9,
+      "leverage": 9.56,
+      "asset_volatility": 0.286,
+      "covenants": [
+        {
+          "name": "net_leverage",
+          "threshold": 5.5,
+          "direction": "leq_threshold",
+          "cushion": 0.176
+        }
+      ],
+      "collateral_coverage": 1.399
+    },
+    {
+      "loan_id": "L-039",
+      "issuer": "I-020",
+      "sector": "telecom",
+      "geography": "uk",
+      "seniority": "second_lien",
+      "principal": 29830921.42,
+      "coupon": 0.1308,
+      "maturity_years": 5.43,
+      "leverage": 6.93,
+      "asset_volatility": 0.386,
+      "covenants": [
+        {
+          "name": "net_leverage",
+          "threshold": 5.5,
+          "direction": "leq_threshold",
+          "cushion": 0.216
+        }
+      ],
+      "collateral_coverage": 1.517
+    },
+    {
+      "loan_id": "L-040",
+      "issuer": "I-020",
+      "sector": "other",
+      "geography": "eu_core",
+      "seniority": "senior_unsecured",
+      "principal": 70993150.14,
+      "coupon": 0.1051,
+      "maturity_years": 6.12,
+      "leverage": 11.79,
+      "asset_volatility": 0.255,
+      "covenants": [
+        {
+          "name": "net_leverage",
+          "threshold": 5.5,
+          "direction": "leq_threshold",
+          "cushion": 0.216
+        }
+      ],
+      "collateral_coverage": 1.24
+    },
+    {
+      "loan_id": "L-041",
+      "issuer": "I-021",
+      "sector": "real_estate",
+      "geography": "eu_core",
+      "seniority": "senior_secured",
+      "principal": 29063851.8,
+      "coupon": 0.0968,
+      "maturity_years": 3.88,
+      "leverage": 2.54,
+      "asset_volatility": 0.269,
+      "covenants": [
+        {
+          "name": "net_leverage",
+          "threshold": 5.5,
+          "direction": "leq_threshold",
+          "cushion": 0.178
+        }
+      ],
+      "collateral_coverage": 1.029
+    },
+    {
+      "loan_id": "L-042",
+      "issuer": "I-021",
+      "sector": "consumer",
+      "geography": "eu_core",
+      "seniority": "senior_secured",
+      "principal": 27870133.02,
+      "coupon": 0.1147,
+      "maturity_years": 5.12,
+      "leverage": 0.99,
+      "asset_volatility": 0.326,
+      "covenants": [
+        {
+          "name": "net_leverage",
+          "threshold": 5.5,
+          "direction": "leq_threshold",
+          "cushion": 0.242
+        }
+      ],
+      "collateral_coverage": 1.419
+    },
+    {
+      "loan_id": "L-043",
+      "issuer": "I-022",
+      "sector": "industrials",
+      "geography": "nordics",
+      "seniority": "mezzanine",
+      "principal": 32988860.57,
+      "coupon": 0.0954,
+      "maturity_years": 3.29,
+      "leverage": 11.47,
+      "asset_volatility": 0.367,
+      "covenants": [
+        {
+          "name": "net_leverage",
+          "threshold": 5.5,
+          "direction": "leq_threshold",
+          "cushion": 0.182
+        }
+      ],
+      "collateral_coverage": 0.829
+    },
+    {
+      "loan_id": "L-044",
+      "issuer": "I-022",
+      "sector": "industrials",
+      "geography": "eu_core",
+      "seniority": "second_lien",
+      "principal": 73666999.55,
+      "coupon": 0.1016,
+      "maturity_years": 6.05,
+      "leverage": 7.4,
+      "asset_volatility": 0.395,
+      "covenants": [
+        {
+          "name": "net_leverage",
+          "threshold": 5.5,
+          "direction": "leq_threshold",
+          "cushion": 0.212
+        }
+      ],
+      "collateral_coverage": 0.843
+    },
+    {
+      "loan_id": "L-045",
+      "issuer": "I-023",
+      "sector": "industrials",
+      "geography": "eu_core",
+      "seniority": "senior_secured",
+      "principal": 57549566.12,
+      "coupon": 0.0739,
+      "maturity_years": 3.86,
+      "leverage": 12.54,
+      "asset_volatility": 0.293,
+      "covenants": [
+        {
+          "name": "net_leverage",
+          "threshold": 5.5,
+          "direction": "leq_threshold",
+          "cushion": 0.279
+        }
+      ],
+      "collateral_coverage": 1.549
+    },
+    {
+      "loan_id": "L-046",
+      "issuer": "I-023",
+      "sector": "industrials",
+      "geography": "eu_core",
+      "seniority": "senior_unsecured",
+      "principal": 12170006.34,
+      "coupon": 0.0809,
+      "maturity_years": 6.8,
+      "leverage": 9.64,
+      "asset_volatility": 0.283,
+      "covenants": [
+        {
+          "name": "net_leverage",
+          "threshold": 5.5,
+          "direction": "leq_threshold",
+          "cushion": 0.286
+        }
+      ],
+      "collateral_coverage": 1.363
+    },
+    {
+      "loan_id": "L-047",
+      "issuer": "I-024",
+      "sector": "utilities",
+      "geography": "eu_periphery",
+      "seniority": "senior_secured",
+      "principal": 45918708.44,
+      "coupon": 0.0784,
+      "maturity_years": 3.64,
+      "leverage": 12.05,
+      "asset_volatility": 0.39,
+      "covenants": [
+        {
+          "name": "net_leverage",
+          "threshold": 5.5,
+          "direction": "leq_threshold",
+          "cushion": 0.198
+        }
+      ],
+      "collateral_coverage": 0.91
+    },
+    {
+      "loan_id": "L-048",
+      "issuer": "I-024",
+      "sector": "financials",
+      "geography": "eu_core",
+      "seniority": "senior_secured",
+      "principal": 36005119.51,
+      "coupon": 0.0806,
+      "maturity_years": 4.46,
+      "leverage": 10.76,
+      "asset_volatility": 0.331,
+      "covenants": [
+        {
+          "name": "net_leverage",
+          "threshold": 5.5,
+          "direction": "leq_threshold",
+          "cushion": 0.143
+        }
+      ],
+      "collateral_coverage": 1.373
+    },
+    {
+      "loan_id": "L-049",
+      "issuer": "I-025",
+      "sector": "other",
+      "geography": "eu_periphery",
+      "seniority": "senior_secured",
+      "principal": 39079423.6,
+      "coupon": 0.092,
+      "maturity_years": 5.39,
+      "leverage": 3.27,
+      "asset_volatility": 0.388,
+      "covenants": [
+        {
+          "name": "net_leverage",
+          "threshold": 5.5,
+          "direction": "leq_threshold",
+          "cushion": 0.316
+        }
+      ],
+      "collateral_coverage": 1.204
+    },
+    {
+      "loan_id": "L-050",
+      "issuer": "I-025",
+      "sector": "industrials",
+      "geography": "switzerland",
+      "seniority": "senior_secured",
+      "principal": 46761777.05,
+      "coupon": 0.1054,
+      "maturity_years": 3.43,
+      "leverage": 7.62,
+      "asset_volatility": 0.386,
+      "covenants": [
+        {
+          "name": "net_leverage",
+          "threshold": 5.5,
+          "direction": "leq_threshold",
+          "cushion": 0.196
+        }
+      ],
+      "collateral_coverage": 1.07
+    }
+  ],
+  "_calibration": {
+    "sector_source": "Eurostat NACE A64 EU27 2022 GVA",
+    "leverage_source": "SEC EDGAR FSDS 2024Q3+Q4",
+    "coupon_source": "ECB MFI new-business lending rates to NFCs",
+    "pd_anchor_recommended": 7.33,
+    "pd_anchor_spike_current": 1.5
+  }
+}

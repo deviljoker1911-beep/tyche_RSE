@@ -1,0 +1,24 @@
+{
+  "_notes": [
+    "Base rate is max(most-recent monthly observation, trailing-3y mean)",
+    "to avoid under-pricing if rates are below the cycle median.",
+    "Private-credit spread of 525 bps is the mid of senior unitranche",
+    "guidance from public AIC / Cliffwater commentary; second-lien and",
+    "mezz add 200-400 bps. The synthetic generator samples loan-by-loan",
+    "from N(spread, stdev)."
+  ],
+  "base_lending_rate_pct": 4.33,
+  "central_coupon_fraction": 0.0958,
+  "generated_from": "data/scripts/calibrate/coupons.py",
+  "private_credit_spread_bps_central": 525.0,
+  "private_credit_spread_bps_stdev": 200.0,
+  "source": "ECB MFI new-business lending rates to NFCs, euro area",
+  "stats_pct": {
+    "avg_10y": 2.44,
+    "avg_3y": 4.33,
+    "full_history_mean": 3.2,
+    "full_history_stdev": 1.39,
+    "most_recent": 3.51
+  },
+  "version": "v0.1.0-calibrated"
+}

@@ -1,0 +1,37 @@
+[
+  {
+    "gdp_shock": -0.005,
+    "name": "Baseline 2026",
+    "rate_shock_bps": 0.0,
+    "scenario_id": "baseline_2026",
+    "sector_shocks": {}
+  },
+  {
+    "gdp_shock": -0.0347,
+    "name": "Global financial crisis",
+    "rate_shock_bps": 0.0,
+    "scenario_id": "lehman_2008",
+    "sector_shocks": {}
+  },
+  {
+    "gdp_shock": -0.0262,
+    "name": "EU sovereign-debt crisis",
+    "rate_shock_bps": 0.0,
+    "scenario_id": "eu_sovereign_2011",
+    "sector_shocks": {}
+  },
+  {
+    "gdp_shock": -0.072,
+    "name": "COVID demand collapse",
+    "rate_shock_bps": 0.0,
+    "scenario_id": "covid_2020",
+    "sector_shocks": {}
+  },
+  {
+    "gdp_shock": -0.0272,
+    "name": "Inflation / rate-shock",
+    "rate_shock_bps": 7.0,
+    "scenario_id": "inflation_shock_2022",
+    "sector_shocks": {}
+  }
+]

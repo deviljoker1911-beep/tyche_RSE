@@ -44,7 +44,10 @@ declare -a FRED=(
   WTREGEN            # Treasury general account
 )
 for s in "${FRED[@]}"; do
-  fetch "https://fred.stlouisfed.org/graph/fredgraph.csv?id=$s" "$RAW/fred/${s}.csv" || true
+  # Default endpoint returns the last ~3 years; we explicitly request full
+  # history so calibration can reach Lehman 2008 and COVID 2020.
+  fetch "https://fred.stlouisfed.org/graph/fredgraph.csv?id=$s&cosd=1900-01-01&coed=2026-12-31" \
+        "$RAW/fred/${s}.csv" || true
 done
 
 echo

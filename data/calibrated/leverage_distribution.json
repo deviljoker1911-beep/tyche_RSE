@@ -1,0 +1,28 @@
+{
+  "_notes": [
+    "This is a US public-company proxy. European mid-market direct",
+    "lending is materially more levered: typical range is 4.0\u20136.5x",
+    "vs the ~3.5x median here. The synthetic generator uses these",
+    "percentiles as the *shape* of the distribution but rescales the",
+    "median to a credit-fund-realistic anchor (default: 4.5x)."
+  ],
+  "filter": "0.1x <= leverage <= 15x, EBITDA > 0",
+  "generated_from": "data/scripts/calibrate/leverage.py",
+  "mean": 5.29,
+  "median": 4.605,
+  "metric": "(LongTermDebt + DebtCurrent) / (OperatingIncomeLoss + D&A)",
+  "percentiles": {
+    "p10": 0.795,
+    "p25": 2.031,
+    "p5": 0.435,
+    "p50": 4.605,
+    "p75": 8.111,
+    "p90": 11.079,
+    "p95": 13.042
+  },
+  "raw_sample_size": 1133,
+  "sample_size": 651,
+  "source": "SEC EDGAR Financial Statement Data Sets, 2024Q3+Q4 filings",
+  "stdev": 3.844,
+  "version": "v0.1.0-calibrated"
+}

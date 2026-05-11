@@ -1,0 +1,56 @@
+{
+  "_notes": [
+    "We deliberately use the CENTRAL value as the simulator's",
+    "single point estimate. Phase 2 will replace this with a",
+    "Beta(alpha, beta) draw per defaulted loan to capture",
+    "stochastic recovery \u2014 at which point the lower_5th /",
+    "upper_95th fields become the distribution parameters.",
+    "",
+    "EU mid-market workouts are slower than US ones. The",
+    "central numbers above are biased to the EU side of the",
+    "published US/EU range (typically 5-10 pts lower than US",
+    "senior-secured studies)."
+  ],
+  "calibrated_anchor_method": "consensus mid of published aggregates",
+  "generated_from": "data/scripts/calibrate/recovery.py",
+  "recovery_floors": {
+    "equity": {
+      "central": 0.05,
+      "lower_5th": 0.0,
+      "source": "Moody's URD equity-like tranches",
+      "upper_95th": 0.2
+    },
+    "mezzanine": {
+      "central": 0.15,
+      "lower_5th": 0.0,
+      "source": "S&P / Preqin mezz fund return commentary (illustrative)",
+      "upper_95th": 0.4
+    },
+    "second_lien": {
+      "central": 0.45,
+      "lower_5th": 0.2,
+      "source": "Moody's URD 2nd-lien tranches; S&P EU recovery study",
+      "upper_95th": 0.65
+    },
+    "senior_secured": {
+      "central": 0.65,
+      "lower_5th": 0.45,
+      "source": "Moody's URD 2010-2023 senior secured; EBA workout reports",
+      "upper_95th": 0.8
+    },
+    "senior_unsecured": {
+      "central": 0.4,
+      "lower_5th": 0.15,
+      "source": "Moody's URD senior unsecured corp; S&P recovery report",
+      "upper_95th": 0.6
+    },
+    "subordinated": {
+      "central": 0.25,
+      "lower_5th": 0.05,
+      "source": "Moody's URD subordinated debt",
+      "upper_95th": 0.5
+    }
+  },
+  "spike_anchor_method": "hand-picked priors from ad-hoc reading",
+  "version": "v0.1.0-calibrated"
+}

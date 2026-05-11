@@ -1,0 +1,87 @@
+{
+  "generated_from": "data/scripts/calibrate/scenarios.py",
+  "scenarios": [
+    {
+      "_provenance": {
+        "note": "no-shock baseline",
+        "sources": [
+          "hand-anchored"
+        ]
+      },
+      "gdp_shock": -0.005,
+      "name": "Baseline 2026",
+      "rate_shock_bps": 0.0,
+      "scenario_id": "baseline_2026",
+      "sector_shocks": {}
+    },
+    {
+      "_provenance": {
+        "ff_policy_rate_change_bps": -176.0,
+        "sources": [
+          "fred:GDPC1",
+          "fred:BAMLH0A0HYM2",
+          "fred:DFF"
+        ],
+        "window_end": "2009-06-30",
+        "window_start": "2008-06-01"
+      },
+      "gdp_shock": -0.0347,
+      "name": "Global financial crisis",
+      "rate_shock_bps": 0.0,
+      "scenario_id": "lehman_2008",
+      "sector_shocks": {}
+    },
+    {
+      "_provenance": {
+        "ff_policy_rate_change_bps": -1.0,
+        "sources": [
+          "fred:GDPC1",
+          "fred:BAMLH0A0HYM2",
+          "fred:DFF"
+        ],
+        "window_end": "2012-12-31",
+        "window_start": "2011-06-01"
+      },
+      "gdp_shock": -0.0262,
+      "name": "EU sovereign-debt crisis",
+      "rate_shock_bps": 0.0,
+      "scenario_id": "eu_sovereign_2011",
+      "sector_shocks": {}
+    },
+    {
+      "_provenance": {
+        "ff_policy_rate_change_bps": -150.0,
+        "sources": [
+          "fred:GDPC1",
+          "fred:BAMLH0A0HYM2",
+          "fred:DFF"
+        ],
+        "window_end": "2020-09-30",
+        "window_start": "2020-02-01"
+      },
+      "gdp_shock": -0.072,
+      "name": "COVID demand collapse",
+      "rate_shock_bps": 0.0,
+      "scenario_id": "covid_2020",
+      "sector_shocks": {}
+    },
+    {
+      "_provenance": {
+        "ff_policy_rate_change_bps": 500.0,
+        "sources": [
+          "fred:GDPC1",
+          "fred:BAMLH0A0HYM2",
+          "fred:DFF"
+        ],
+        "window_end": "2023-06-30",
+        "window_start": "2022-03-01"
+      },
+      "gdp_shock": -0.0272,
+      "name": "Inflation / rate-shock",
+      "rate_shock_bps": 7.0,
+      "scenario_id": "inflation_shock_2022",
+      "sector_shocks": {}
+    }
+  ],
+  "version": "v0.1.0-calibrated"
+}
