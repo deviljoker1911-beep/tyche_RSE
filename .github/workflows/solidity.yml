@@ -11,18 +11,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          submodules: recursive
       - uses: foundry-rs/foundry-toolchain@v1
         with:
-          version: stable
-      - name: forge install
+          version: v1.7.1
+      - name: forge install (pinned)
         working-directory: contracts
         run: |
           if [ ! -d lib/forge-std ]; then
-            forge install foundry-rs/forge-std --no-commit
-            forge install OpenZeppelin/openzeppelin-contracts@release-v5.0 --no-commit
-            forge install Vectorized/solady --no-commit
+            forge install --no-git --shallow \
+              foundry-rs/forge-std@v1.9.4 \
+              OpenZeppelin/openzeppelin-contracts@v5.0.2 \
+              Vectorized/solady@v0.1.16
           fi
       - name: forge build
         working-directory: contracts
@@ -30,22 +29,30 @@ jobs:
       - name: forge test
         working-directory: contracts
         run: forge test -vvv
+      - name: forge coverage
+        working-directory: contracts
+        run: forge coverage --report summary
+      - name: forge gas snapshot
+        working-directory: contracts
+        run: forge snapshot --diff
+        continue-on-error: true
 
   slither:
     name: slither static analysis
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          submodules: recursive
       - uses: foundry-rs/foundry-toolchain@v1
-      - name: forge install
+        with:
+          version: v1.7.1
+      - name: forge install (pinned)
         working-directory: contracts
         run: |
           if [ ! -d lib/forge-std ]; then
-            forge install foundry-rs/forge-std --no-commit
-            forge install OpenZeppelin/openzeppelin-contracts@release-v5.0 --no-commit
-            forge install Vectorized/solady --no-commit
+            forge install --no-git --shallow \
+              foundry-rs/forge-std@v1.9.4 \
+              OpenZeppelin/openzeppelin-contracts@v5.0.2 \
+              Vectorized/solady@v0.1.16
           fi
       - uses: crytic/slither-action@v0.4.0
         with:

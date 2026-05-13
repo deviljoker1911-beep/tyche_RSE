@@ -29,6 +29,9 @@ pnpm-debug.log*
 /contracts/cache
 /contracts/broadcast
 /contracts/.gas-snapshot.tmp
+# Vendored libraries are pulled via `forge install`, not committed.
+/contracts/lib/*
+!/contracts/lib/.gitkeep
 
 # Editors / OS
 .DS_Store
