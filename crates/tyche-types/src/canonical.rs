@@ -44,10 +44,16 @@ fn write_canonical(buf: &mut Vec<u8>, value: &Value) -> Result<(), TypesError> {
         }
         Value::Number(n) => {
             // Integer fast-path keeps "1" rather than "1.0".
+            //
+            // `write!` to a `Vec<u8>` returns `io::Result`, but `Vec`'s
+            // `io::Write` impl is infallible — it only fails on OOM, which
+            // panics elsewhere first. Using `.expect()` documents the
+            // invariant while keeping the surface clean.
+            const VEC_WRITE_INFALLIBLE: &str = "write to Vec<u8> is infallible";
             if let Some(i) = n.as_i64() {
-                write!(buf, "{i}").unwrap();
+                write!(buf, "{i}").expect(VEC_WRITE_INFALLIBLE);
             } else if let Some(u) = n.as_u64() {
-                write!(buf, "{u}").unwrap();
+                write!(buf, "{u}").expect(VEC_WRITE_INFALLIBLE);
             } else if let Some(f) = n.as_f64() {
                 if !f.is_finite() {
                     return Err(TypesError::Invariant(format!(
@@ -59,9 +65,9 @@ fn write_canonical(buf: &mut Vec<u8>, value: &Value) -> Result<(), TypesError> {
                 // decimal point so {"x": 1.0} canonicalises identically to
                 // {"x": 1}.
                 if f.fract() == 0.0 && f.abs() < 1e16 {
-                    write!(buf, "{}", f as i64).unwrap();
+                    write!(buf, "{}", f as i64).expect(VEC_WRITE_INFALLIBLE);
                 } else {
-                    write!(buf, "{f}").unwrap();
+                    write!(buf, "{f}").expect(VEC_WRITE_INFALLIBLE);
                 }
             } else {
                 return Err(TypesError::Invariant("unsupported number".into()));
@@ -109,7 +115,9 @@ fn write_string(buf: &mut Vec<u8>, s: &str) {
             '\u{08}' => buf.extend_from_slice(b"\\b"),
             '\u{0c}' => buf.extend_from_slice(b"\\f"),
             c if (c as u32) < 0x20 => {
-                write!(buf, "\\u{:04x}", c as u32).unwrap();
+                // `write!` to `Vec<u8>` cannot fail; see `write_canonical` for
+                // the full rationale.
+                write!(buf, "\\u{:04x}", c as u32).expect("write to Vec<u8> is infallible");
             }
             c => {
                 let mut tmp = [0u8; 4];
@@ -153,14 +161,13 @@ mod tests {
     }
 
     #[test]
-    fn rejects_nan() {
-        let v = serde_json::Value::from(serde_json::Number::from_f64(f64::NAN));
-        // serde_json refuses to encode NaN as a Number entirely; we simulate
-        // by injecting via a manual Value tree.
-        if let Some(num) = v {
-            let res = canonical_json(&num);
-            assert!(res.is_err());
-        }
+    fn serde_json_already_rejects_nan() {
+        // serde_json's `Number::from_f64` returns `None` for non-finite values.
+        // Our canonical encoder relies on this upstream guarantee so we
+        // codify it as a regression test rather than reach Value construction.
+        assert!(serde_json::Number::from_f64(f64::NAN).is_none());
+        assert!(serde_json::Number::from_f64(f64::INFINITY).is_none());
+        assert!(serde_json::Number::from_f64(f64::NEG_INFINITY).is_none());
     }
 
     #[test]

@@ -228,7 +228,9 @@ mod tests {
     #[test]
     fn seniority_ordering() {
         assert!(Seniority::SeniorSecured < Seniority::Equity);
-        assert!(Seniority::SeniorSecured.base_recovery_rate() > Seniority::Equity.base_recovery_rate());
+        assert!(
+            Seniority::SeniorSecured.base_recovery_rate() > Seniority::Equity.base_recovery_rate()
+        );
     }
 
     #[test]

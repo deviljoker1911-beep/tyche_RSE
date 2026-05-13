@@ -66,8 +66,8 @@ pub fn simulate_js(input_json: &str) -> Result<JsValue, JsError> {
         .config
         .unwrap_or_default()
         .merge(SimConfig::default());
-    let metrics =
-        simulate(&parsed.portfolio, &parsed.scenario, cfg).map_err(|e| JsError::new(&e.to_string()))?;
+    let metrics = simulate(&parsed.portfolio, &parsed.scenario, cfg)
+        .map_err(|e| JsError::new(&e.to_string()))?;
     to_value(&metrics).map_err(|e| JsError::new(&e.to_string()))
 }
 

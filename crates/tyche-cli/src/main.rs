@@ -15,7 +15,7 @@ use ed25519_dalek::SigningKey;
 use rand::RngCore;
 use rand::rngs::OsRng;
 use serde::Serialize;
-use tyche_attest::{AttestBatch, AttestationRecord, build_attestation, verify_attestation};
+use tyche_attest::{AttestationRecord, build_attestation, verify_attestation};
 use tyche_fed::{aggregate, verify_aggregate_consistency};
 use tyche_sim::{SimConfig, simulate};
 use tyche_types::{MacroScenario, Portfolio, RiskMetrics};
@@ -139,7 +139,8 @@ fn load_portfolio(path: &Path) -> Result<Portfolio> {
     let bytes = fs::read(path).with_context(|| format!("read portfolio {}", path.display()))?;
     let p: Portfolio = serde_json::from_slice(&bytes)
         .with_context(|| format!("parse portfolio {}", path.display()))?;
-    p.validate().map_err(|e| anyhow!("portfolio invalid: {e}"))?;
+    p.validate()
+        .map_err(|e| anyhow!("portfolio invalid: {e}"))?;
     Ok(p)
 }
 
@@ -369,13 +370,20 @@ fn print_metrics(
     println!("  as_of       : {}", portfolio.as_of);
     println!("  loans       : {}", portfolio.loans.len());
     println!("  exposure    : {:>15.0}", portfolio.total_exposure());
-    println!("  scenario    : {}  (gdp_shock {:+.1}%)", scenario.scenario_id, scenario.gdp_shock * 100.0);
+    println!(
+        "  scenario    : {}  (gdp_shock {:+.1}%)",
+        scenario.scenario_id,
+        scenario.gdp_shock * 100.0
+    );
     println!("  paths       : {}", m.n_paths);
     println!();
     println!("  Expected loss        : {:>15.2}", m.expected_loss);
     println!("  VaR 95%              : {:>15.2}", m.var_95);
     println!("  VaR 99%              : {:>15.2}", m.var_99);
-    println!("  Expected shortfall   : {:>15.2}", m.expected_shortfall_975);
+    println!(
+        "  Expected shortfall   : {:>15.2}",
+        m.expected_shortfall_975
+    );
     println!();
     println!("  By sector:");
     for (sector, c) in &m.sector_contributions {

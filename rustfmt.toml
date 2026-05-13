@@ -1,7 +1,7 @@
 edition = "2024"
 max_width = 100
-imports_granularity = "Crate"
-group_imports = "StdExternalCrate"
 reorder_imports = true
 newline_style = "Unix"
 use_field_init_shorthand = true
+# Note: `imports_granularity` and `group_imports` are nightly-only and
+# intentionally omitted so `cargo fmt --check` is green on stable.

@@ -48,6 +48,11 @@ pnpm-debug.log*
 # Coverage
 /coverage
 /lcov.info
+target/llvm-cov-target/
+
+# proptest regressions (per-machine seed history, not portable)
+**/proptest-regressions/
+*.proptest-regressions
 
 # Nix
 result

@@ -21,3 +21,4 @@ thiserror = { workspace = true }
 
 [dev-dependencies]
 proptest = { workspace = true }
+curve25519-dalek = { workspace = true }

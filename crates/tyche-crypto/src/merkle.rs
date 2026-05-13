@@ -229,7 +229,13 @@ mod tests {
     }
 
     proptest! {
-        #![proptest_config(ProptestConfig { cases: 32, .. ProptestConfig::default() })]
+        // Bumped to 10_000 cases per M1A. Merkle inclusion is critical for
+        // attestation verification; we want every off-by-one and odd-leaf
+        // corner case shaken out.
+        #![proptest_config(ProptestConfig {
+            cases: if std::env::var("TYCHE_PROPTEST_FAST").is_ok() { 32 } else { 10_000 },
+            .. ProptestConfig::default()
+        })]
 
         #[test]
         fn proofs_verify_for_arbitrary_size(n in 1usize..256) {

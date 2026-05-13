@@ -364,8 +364,15 @@ mod tests {
     #[test]
     fn record_round_trip_and_verifies() {
         let sk = signing_key();
-        let r = build_attestation(&portfolio(), &[7u8; 32], &scenario(), &metrics(), "v0.1.0", &sk)
-            .unwrap();
+        let r = build_attestation(
+            &portfolio(),
+            &[7u8; 32],
+            &scenario(),
+            &metrics(),
+            "v0.1.0",
+            &sk,
+        )
+        .unwrap();
         verify_attestation(&r).unwrap();
         let s = serde_json::to_string(&r).unwrap();
         let r2: AttestationRecord = serde_json::from_str(&s).unwrap();

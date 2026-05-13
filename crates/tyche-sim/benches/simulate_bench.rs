@@ -3,6 +3,10 @@
 //! Goal from the spike spec: a 100-loan portfolio at 20k paths in <200ms on a
 //! modern laptop. Run with `cargo bench -p tyche-sim`.
 
+// Benchmark binaries don't expose a public API; the macros below generate
+// the test scaffolding so doc-required-on-public-items doesn't apply.
+#![allow(missing_docs)]
+
 use std::collections::BTreeMap;
 
 use criterion::{Criterion, criterion_group, criterion_main};

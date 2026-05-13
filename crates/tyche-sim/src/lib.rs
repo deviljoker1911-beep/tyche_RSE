@@ -131,8 +131,8 @@ pub fn simulate(
                 let z = model.combine(z_market, z_sec, z_idio);
                 let pd = pds[&loan.loan_id];
                 let default_threshold = inverse_normal_cdf(pd);
-                let defaulted = z < default_threshold
-                    || covenant_breach_default(loan, scenario, &mut rng);
+                let defaulted =
+                    z < default_threshold || covenant_breach_default(loan, scenario, &mut rng);
                 if defaulted {
                     let loss = euls[&loan.loan_id];
                     total_loss += loss;
@@ -290,7 +290,8 @@ fn std_normal_cdf(x: f64) -> f64 {
     let abs_x = x.abs();
     let t = 1.0 / (1.0 + p * abs_x);
     let pdf = (-0.5 * x * x).exp() / (2.0 * std::f64::consts::PI).sqrt();
-    let cdf = 1.0 - pdf * (b1 * t + b2 * t.powi(2) + b3 * t.powi(3) + b4 * t.powi(4) + b5 * t.powi(5));
+    let cdf =
+        1.0 - pdf * (b1 * t + b2 * t.powi(2) + b3 * t.powi(3) + b4 * t.powi(4) + b5 * t.powi(5));
     if x >= 0.0 { cdf } else { 1.0 - cdf }
 }
 
@@ -463,7 +464,11 @@ mod tests {
             ..SimConfig::default()
         };
         let m = simulate(&p, &s, cfg).unwrap();
-        let summed: f64 = m.sector_contributions.values().map(|c| c.expected_loss).sum();
+        let summed: f64 = m
+            .sector_contributions
+            .values()
+            .map(|c| c.expected_loss)
+            .sum();
         assert!(
             (summed - m.expected_loss).abs() < 1e-9 * m.expected_loss.max(1.0),
             "sector EL sum {} vs total {}",

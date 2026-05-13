@@ -149,7 +149,14 @@ mod tests {
     }
 
     proptest! {
-        #![proptest_config(ProptestConfig { cases: 64, .. ProptestConfig::default() })]
+        // Bumped to 10_000 cases per M1A. Pedersen homomorphism is the
+        // load-bearing invariant of the federation layer; we want a tight
+        // probabilistic guarantee, not just a smoke test.
+        // The TYCHE_PROPTEST_FAST=1 escape lets local dev cut this back.
+        #![proptest_config(ProptestConfig {
+            cases: if std::env::var("TYCHE_PROPTEST_FAST").is_ok() { 64 } else { 10_000 },
+            .. ProptestConfig::default()
+        })]
 
         #[test]
         fn homomorphism(a in 0u64..1_000_000, b in 0u64..1_000_000) {
