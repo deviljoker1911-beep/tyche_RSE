@@ -15,5 +15,12 @@
     "typecheck": "pnpm --recursive run typecheck",
     "test": "pnpm --recursive run test",
     "format": "pnpm --recursive run format"
+  },
+  "pnpm": {
+    "overrides": {
+      "axios@<1.15.2": ">=1.15.2",
+      "cookie@<0.7.0": ">=0.7.0",
+      "nanoid@<3.3.8": ">=3.3.8"
+    }
   }
 }

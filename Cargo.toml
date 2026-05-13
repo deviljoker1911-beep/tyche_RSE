@@ -60,7 +60,7 @@ js-sys = "0.3"
 console_error_panic_hook = "0.1"
 
 # Python bindings
-pyo3 = { version = "0.23", features = ["extension-module"] }
+pyo3 = { version = "0.24", features = ["extension-module"] }
 
 # HTTP server (scaffolded for Phase 2)
 axum = "0.7"

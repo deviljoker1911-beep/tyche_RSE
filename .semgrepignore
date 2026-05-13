@@ -1,0 +1,11 @@
+# Paths Semgrep should skip.
+target/
+node_modules/
+**/dist/
+**/.next/
+contracts/lib/
+contracts/out/
+contracts/cache/
+data/raw/
+data/processed/
+**/*.proptest-regressions

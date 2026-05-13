@@ -1,0 +1,9 @@
+# gitleaks allowlist.
+#
+# Paths/regexes that contain test fixtures or documented dummy values that
+# would otherwise trip the secret scanner.
+data/raw/**
+data/processed/**
+contracts/lib/**
+**/proptest-regressions/**
+crates/tyche-attest/src/lib.rs:373..425  # test-only ephemeral signing keys

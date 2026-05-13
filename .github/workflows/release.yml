@@ -1,0 +1,128 @@
+name: release
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to build (e.g. v0.1.0)'
+        required: true
+
+permissions:
+  contents: write
+  packages: write
+  id-token: write       # for sigstore/cosign keyless signing + SLSA provenance
+  attestations: write   # for actions/attest-build-provenance
+
+jobs:
+  build-artifacts:
+    name: build & sign
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+          - os: macos-latest
+            target: aarch64-apple-darwin
+          - os: macos-13
+            target: x86_64-apple-darwin
+    outputs:
+      hash-linux: ${{ steps.hash.outputs.linux }}
+      hash-mac-arm: ${{ steps.hash.outputs.mac-arm }}
+      hash-mac-x86: ${{ steps.hash.outputs.mac-x86 }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+      - uses: Swatinem/rust-cache@v2
+      - name: build CLI
+        run: cargo build --release --bin tyche --target ${{ matrix.target }}
+      - name: stage artifact
+        id: stage
+        run: |
+          mkdir -p dist
+          cp target/${{ matrix.target }}/release/tyche dist/tyche-${{ matrix.target }}
+          chmod +x dist/tyche-${{ matrix.target }}
+          tar -C dist -czf dist/tyche-${{ matrix.target }}.tar.gz tyche-${{ matrix.target }}
+          echo "artifact=dist/tyche-${{ matrix.target }}.tar.gz" >> "$GITHUB_OUTPUT"
+      - name: hash
+        id: hash
+        run: |
+          sha=$(shasum -a 256 ${{ steps.stage.outputs.artifact }} | awk '{print $1}')
+          echo "${sha}  $(basename ${{ steps.stage.outputs.artifact }})" > ${{ steps.stage.outputs.artifact }}.sha256
+          case "${{ matrix.target }}" in
+            x86_64-unknown-linux-gnu) echo "linux=${sha}" >> "$GITHUB_OUTPUT" ;;
+            aarch64-apple-darwin)     echo "mac-arm=${sha}" >> "$GITHUB_OUTPUT" ;;
+            x86_64-apple-darwin)      echo "mac-x86=${sha}" >> "$GITHUB_OUTPUT" ;;
+          esac
+
+      # Sigstore keyless signing using the GitHub OIDC identity.
+      - uses: sigstore/cosign-installer@v3
+      - name: cosign sign
+        run: |
+          cosign sign-blob --yes \
+            --bundle ${{ steps.stage.outputs.artifact }}.cosign.bundle \
+            ${{ steps.stage.outputs.artifact }}
+
+      # SBOM via syft + cosign attestation.
+      - uses: anchore/sbom-action@v0
+        with:
+          path: .
+          format: cyclonedx-json
+          output-file: ${{ steps.stage.outputs.artifact }}.sbom.cdx.json
+          upload-artifact: false
+      - name: cosign attest SBOM
+        run: |
+          cosign attest-blob --yes \
+            --predicate ${{ steps.stage.outputs.artifact }}.sbom.cdx.json \
+            --type cyclonedx \
+            --bundle ${{ steps.stage.outputs.artifact }}.sbom.bundle \
+            ${{ steps.stage.outputs.artifact }}
+
+      # GitHub-native build provenance (SLSA L2-equivalent path).
+      - uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: ${{ steps.stage.outputs.artifact }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tyche-${{ matrix.target }}
+          path: |
+            ${{ steps.stage.outputs.artifact }}
+            ${{ steps.stage.outputs.artifact }}.sha256
+            ${{ steps.stage.outputs.artifact }}.cosign.bundle
+            ${{ steps.stage.outputs.artifact }}.sbom.cdx.json
+            ${{ steps.stage.outputs.artifact }}.sbom.bundle
+
+  # Independent SLSA L3 provenance generator. Runs in an isolated builder
+  # so the signing key cannot be tampered with by the build job.
+  slsa-provenance:
+    name: SLSA provenance
+    needs: [build-artifacts]
+    permissions:
+      id-token: write
+      contents: write
+      actions: read
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.0.0
+    with:
+      base64-subjects: |-
+        ${{ needs.build-artifacts.outputs.hash-linux }} tyche-x86_64-unknown-linux-gnu.tar.gz
+        ${{ needs.build-artifacts.outputs.hash-mac-arm }} tyche-aarch64-apple-darwin.tar.gz
+        ${{ needs.build-artifacts.outputs.hash-mac-x86 }} tyche-x86_64-apple-darwin.tar.gz
+      upload-assets: true
+
+  release-page:
+    name: attach to release
+    needs: [build-artifacts]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release'
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/**/*
