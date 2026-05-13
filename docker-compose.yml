@@ -1,0 +1,187 @@
+# Local development stack for the Tyche platform.
+#
+# Brings up the full dependency chain in one command. Mirrors the prod
+# topology, with the exception that the API is stateless today (M1G adds
+# the DB / Redis / ClickHouse wiring). Postgres, Redis, ClickHouse, Prom
+# and Grafana are present so that wiring lands incrementally.
+#
+# Run:   docker compose up -d
+# Stop:  docker compose down
+# Logs:  docker compose logs -f api
+# Bind a local-only loopback so we never expose ports to the LAN.
+
+x-restart: &restart
+  restart: unless-stopped
+
+x-security: &security
+  security_opt:
+    - no-new-privileges:true
+  cap_drop:
+    - ALL
+  read_only: true
+
+services:
+  # ─── Tyche services ──────────────────────────────────────────────────────
+  api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+      args:
+        TYCHE_COMMIT_SHA: ${COMMIT_SHA:-dev}
+        TYCHE_BUILD_TIME: ${BUILD_TIME:-dev}
+    image: tyche-api:dev
+    container_name: tyche-api
+    ports:
+      - "127.0.0.1:8080:8080"
+    environment:
+      TYCHE_API_ADDR: 0.0.0.0:8080
+      RUST_LOG: ${RUST_LOG:-info}
+    <<: [*restart, *security]
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8080/healthz || exit 1"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    tmpfs:
+      - /tmp:size=64M,mode=1777
+
+  web:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.web
+      args:
+        NEXT_PUBLIC_TYCHE_API_URL: http://api:8080
+        NEXT_PUBLIC_COMMIT_SHA: ${COMMIT_SHA:-dev}
+    image: tyche-web:dev
+    container_name: tyche-web
+    ports:
+      - "127.0.0.1:3000:3000"
+    environment:
+      NODE_ENV: production
+      NEXT_TELEMETRY_DISABLED: 1
+      NEXT_PUBLIC_TYCHE_API_URL: http://api:8080
+    depends_on:
+      api:
+        condition: service_healthy
+    <<: [*restart, *security]
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"require('http').get('http://127.0.0.1:3000/api/healthz', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))\""]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+    tmpfs:
+      - /tmp:size=64M
+      - /app/.next/cache:size=128M
+
+  # ─── On-chain layer ──────────────────────────────────────────────────────
+  anvil:
+    image: ghcr.io/foundry-rs/foundry:v1.7.1
+    container_name: tyche-anvil
+    entrypoint: ["anvil"]
+    command:
+      - --host=0.0.0.0
+      - --chain-id=31337
+      - --block-time=2
+      - --accounts=10
+    ports:
+      - "127.0.0.1:8545:8545"
+    <<: *restart
+
+  # ─── Data layer (wired in M1G) ───────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: tyche-postgres
+    environment:
+      POSTGRES_USER: tyche
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-tyche-dev}
+      POSTGRES_DB: tyche
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    <<: *restart
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tyche -d tyche"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: tyche-redis
+    command:
+      - redis-server
+      - --maxmemory 256mb
+      - --maxmemory-policy allkeys-lru
+      - --appendonly no
+    ports:
+      - "127.0.0.1:6379:6379"
+    <<: *restart
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:24-alpine
+    container_name: tyche-clickhouse
+    ports:
+      - "127.0.0.1:8123:8123"
+      - "127.0.0.1:9000:9000"
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    volumes:
+      - clickhouse-data:/var/lib/clickhouse
+    environment:
+      CLICKHOUSE_DB: tyche_attestation
+      CLICKHOUSE_USER: tyche
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-tyche-dev}
+    <<: *restart
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8123/ping"]
+      interval: 15s
+      timeout: 3s
+      retries: 5
+
+  # ─── Observability ───────────────────────────────────────────────────────
+  prometheus:
+    image: prom/prometheus:v2.55.0
+    container_name: tyche-prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.retention.time=7d
+      - --web.enable-lifecycle
+    volumes:
+      - ./docker/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    ports:
+      - "127.0.0.1:9090:9090"
+    <<: *restart
+
+  grafana:
+    image: grafana/grafana:11.3.0
+    container_name: tyche-grafana
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-tyche-dev}
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+      GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./docker/grafana/provisioning:/etc/grafana/provisioning:ro
+    ports:
+      - "127.0.0.1:3001:3000"
+    depends_on:
+      - prometheus
+    <<: *restart
+
+volumes:
+  postgres-data:
+  clickhouse-data:
+  prometheus-data:
+  grafana-data:

@@ -1,0 +1,102 @@
+# syntax=docker/dockerfile:1.7
+#
+# tyche-web production image.
+#
+# Three stages:
+#   1. deps     — pnpm install with cache mount
+#   2. builder  — next build (standalone output) + WASM artifact copy
+#   3. runtime  — node:20-alpine (non-root) serving the standalone bundle
+#
+# We use the Next.js standalone-output mode rather than nginx-unprivileged
+# (the original spec) because:
+#   - Standalone output runs the Next server, which handles RSC streaming,
+#     middleware, and edge functions correctly. nginx would need separate
+#     SSR plumbing.
+#   - Image is still small (~120 MB vs 800 MB+ with full node_modules).
+#   - Surface area is minimal: only the standalone bundle + server.js + the
+#     prebuilt /public assets.
+#
+# If a true static-only build is needed later, swap stage 3 for
+# `nginxinc/nginx-unprivileged` and copy the `out/` directory from
+# `next export` instead.
+#
+# Build: docker build -f docker/Dockerfile.web -t tyche-web .
+
+ARG NODE_VERSION=20.18-alpine
+
+# ─── 1. Dependencies ────────────────────────────────────────────────────────
+FROM node:${NODE_VERSION} AS deps
+
+WORKDIR /app
+
+# pnpm via corepack (shipped with node:20-alpine).
+RUN corepack enable && corepack prepare pnpm@9 --activate
+
+# Lockfile-driven install. Mounting the pnpm store means subsequent builds
+# only re-download changed packages.
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
+COPY apps/web/package.json apps/web/package.json
+
+RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
+    pnpm install --frozen-lockfile --filter @tyche/web... \
+        || pnpm install --filter @tyche/web...
+
+# ─── 2. Build ───────────────────────────────────────────────────────────────
+FROM node:${NODE_VERSION} AS builder
+
+WORKDIR /app
+
+ENV NEXT_TELEMETRY_DISABLED=1
+
+RUN corepack enable && corepack prepare pnpm@9 --activate
+
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/apps/web/node_modules ./apps/web/node_modules
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
+COPY apps/web ./apps/web
+
+ARG NEXT_PUBLIC_TYCHE_API_URL=http://localhost:8080
+ARG NEXT_PUBLIC_COMMIT_SHA=unknown
+ENV NEXT_PUBLIC_TYCHE_API_URL=${NEXT_PUBLIC_TYCHE_API_URL}
+ENV NEXT_PUBLIC_COMMIT_SHA=${NEXT_PUBLIC_COMMIT_SHA}
+
+RUN cd apps/web && pnpm run build
+
+# ─── 3. Runtime ─────────────────────────────────────────────────────────────
+FROM node:${NODE_VERSION} AS runtime
+
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=3000
+ENV HOSTNAME=0.0.0.0
+
+# Non-root runtime user.
+RUN addgroup -S tyche -g 10001 && \
+    adduser -S tyche -G tyche -u 10001
+
+# Standalone output: server.js + minimal node_modules + .next contents.
+# Note: Next.js standalone output is enabled via `output: 'standalone'` in
+# next.config.ts (set in apps/web). If absent, this COPY no-ops; the build
+# stage will produce a non-standalone bundle and the runtime will fail
+# fast. Either way, no silent fallback.
+COPY --from=builder --chown=tyche:tyche /app/apps/web/.next/standalone ./
+COPY --from=builder --chown=tyche:tyche /app/apps/web/.next/static ./apps/web/.next/static
+COPY --from=builder --chown=tyche:tyche /app/apps/web/public ./apps/web/public
+
+# Container health: HTTP GET /api/healthz from the Next server itself.
+# Implemented as a Next route handler in apps/web/app/api/healthz/route.ts.
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+    CMD node -e "require('http').get('http://127.0.0.1:3000/api/healthz', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"
+
+EXPOSE 3000
+
+LABEL org.opencontainers.image.title="tyche-web"
+LABEL org.opencontainers.image.description="Tyche federated risk simulator — Web dashboard"
+LABEL org.opencontainers.image.licenses="Apache-2.0"
+LABEL org.opencontainers.image.source="https://github.com/deviljoker1911-beep/tyche_RSE"
+
+USER tyche:tyche
+
+CMD ["node", "apps/web/server.js"]

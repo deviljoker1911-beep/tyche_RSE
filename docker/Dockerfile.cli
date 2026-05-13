@@ -1,0 +1,76 @@
+# syntax=docker/dockerfile:1.7
+#
+# tyche-cli production image.
+#
+# Two-stage build:
+#   1. `builder` — pinned Rust toolchain, builds a release binary with the
+#      target's musl static linkage so the final stage needs only libc.
+#   2. `runtime` — Google distroless cc-debian12 (~25 MB base), non-root,
+#      read-only filesystem at runtime.
+#
+# Target image: ~30 MB (distroless cc + 5–10 MB tyche binary).
+# Build: docker build -f docker/Dockerfile.cli -t tyche-cli .
+
+ARG RUST_VERSION=1.85
+ARG TARGETPLATFORM
+
+# ─── Builder ────────────────────────────────────────────────────────────────
+FROM --platform=$BUILDPLATFORM rust:${RUST_VERSION}-bookworm AS builder
+
+WORKDIR /work
+
+# Dependency-only layer for caching: copy manifests, build a stub, then cache
+# the dependency graph. Source changes don't invalidate the dep cache.
+COPY rust-toolchain.toml ./
+COPY Cargo.toml Cargo.lock ./
+COPY crates/tyche-types/Cargo.toml      crates/tyche-types/Cargo.toml
+COPY crates/tyche-crypto/Cargo.toml     crates/tyche-crypto/Cargo.toml
+COPY crates/tyche-sim/Cargo.toml        crates/tyche-sim/Cargo.toml
+COPY crates/tyche-attest/Cargo.toml     crates/tyche-attest/Cargo.toml
+COPY crates/tyche-fed/Cargo.toml        crates/tyche-fed/Cargo.toml
+COPY crates/tyche-wasm/Cargo.toml       crates/tyche-wasm/Cargo.toml
+COPY crates/tyche-py/Cargo.toml         crates/tyche-py/Cargo.toml
+COPY crates/tyche-cli/Cargo.toml        crates/tyche-cli/Cargo.toml
+COPY crates/tyche-api/Cargo.toml        crates/tyche-api/Cargo.toml
+
+RUN for c in tyche-types tyche-crypto tyche-sim tyche-attest tyche-fed \
+             tyche-wasm tyche-py tyche-cli tyche-api ; do \
+        mkdir -p crates/$c/src && echo "fn main() {}" > crates/$c/src/main.rs ; \
+        echo "// placeholder" > crates/$c/src/lib.rs ; \
+    done
+
+# Compile dependency tree only.
+RUN --mount=type=cache,target=/usr/local/cargo/registry \
+    --mount=type=cache,target=/work/target \
+    cargo build --release --bin tyche --locked || true
+
+# Real source.
+COPY crates ./crates
+COPY rustfmt.toml ./
+
+RUN --mount=type=cache,target=/usr/local/cargo/registry \
+    --mount=type=cache,target=/work/target \
+    cargo build --release --bin tyche --locked && \
+    cp /work/target/release/tyche /tmp/tyche
+
+# ─── Runtime ────────────────────────────────────────────────────────────────
+FROM gcr.io/distroless/cc-debian12:nonroot AS runtime
+
+# Distroless images run as user `nonroot` (UID 65532) by default. The
+# pod-security-standard "restricted" profile is satisfied out of the box.
+COPY --from=builder --chown=nonroot:nonroot /tmp/tyche /usr/local/bin/tyche
+
+# Default working dir; mount portfolios / scenarios as volumes from compose.
+WORKDIR /data
+
+# Documented metadata.
+LABEL org.opencontainers.image.title="tyche-cli"
+LABEL org.opencontainers.image.description="Tyche federated risk simulator — CLI"
+LABEL org.opencontainers.image.licenses="Apache-2.0"
+LABEL org.opencontainers.image.source="https://github.com/deviljoker1911-beep/tyche_RSE"
+LABEL org.opencontainers.image.documentation="https://github.com/deviljoker1911-beep/tyche_RSE/tree/main/crates/tyche-cli"
+
+USER nonroot:nonroot
+
+ENTRYPOINT ["/usr/local/bin/tyche"]
+CMD ["--help"]

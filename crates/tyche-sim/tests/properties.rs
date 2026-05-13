@@ -47,25 +47,27 @@ fn arb_loan() -> impl Strategy<Value = Loan> {
         0.10_f64..0.60_f64,
         0.3_f64..2.0_f64,
     )
-        .prop_map(|(id, sector, seniority, principal, leverage, vol, cc)| Loan {
-            loan_id: id.clone(),
-            issuer: id,
-            sector,
-            geography: Geography::EuCore,
-            seniority,
-            principal,
-            coupon: 0.07,
-            maturity_years: 5.0,
-            leverage,
-            asset_volatility: vol,
-            collateral_coverage: cc,
-            covenants: vec![Covenant {
-                name: "net_leverage".into(),
-                threshold: 5.5,
-                direction: CovenantDirection::LeqThreshold,
-                cushion: 0.20,
-            }],
-        })
+        .prop_map(
+            |(id, sector, seniority, principal, leverage, vol, cc)| Loan {
+                loan_id: id.clone(),
+                issuer: id,
+                sector,
+                geography: Geography::EuCore,
+                seniority,
+                principal,
+                coupon: 0.07,
+                maturity_years: 5.0,
+                leverage,
+                asset_volatility: vol,
+                collateral_coverage: cc,
+                covenants: vec![Covenant {
+                    name: "net_leverage".into(),
+                    threshold: 5.5,
+                    direction: CovenantDirection::LeqThreshold,
+                    cushion: 0.20,
+                }],
+            },
+        )
 }
 
 fn arb_portfolio() -> impl Strategy<Value = Portfolio> {

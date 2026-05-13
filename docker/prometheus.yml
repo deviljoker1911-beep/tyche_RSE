@@ -1,0 +1,33 @@
+# Prometheus scrape config for the local Tyche stack.
+# Production scrape config lives in `infra/prometheus/` (M1G).
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: tyche-local
+    env: dev
+
+scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  # tyche-api exposes /metrics in M1G. Defined now so the dashboard wiring
+  # works the moment the endpoint lights up.
+  - job_name: tyche-api
+    static_configs:
+      - targets: ["api:8080"]
+    metrics_path: /metrics
+
+  - job_name: clickhouse
+    static_configs:
+      - targets: ["clickhouse:9363"]
+
+  - job_name: postgres
+    static_configs:
+      - targets: ["postgres:9187"]   # postgres_exporter sidecar in M1G
+
+  - job_name: redis
+    static_configs:
+      - targets: ["redis:9121"]      # redis_exporter sidecar in M1G

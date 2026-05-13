@@ -2,6 +2,10 @@ import type { NextConfig } from "next";
 
 const config: NextConfig = {
   reactStrictMode: true,
+  // Required for `docker/Dockerfile.web` — produces a single-binary-style
+  // bundle under `.next/standalone/`. Removing this breaks the production
+  // image.
+  output: "standalone",
   experimental: {
     typedRoutes: true,
   },

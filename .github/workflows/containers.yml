@@ -1,0 +1,141 @@
+name: containers
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+  security-events: write
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_OWNER: ${{ github.repository_owner }}
+
+jobs:
+  build-scan:
+    name: build & scan / ${{ matrix.image }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - image: tyche-cli
+            dockerfile: docker/Dockerfile.cli
+          - image: tyche-api
+            dockerfile: docker/Dockerfile.api
+          - image: tyche-web
+            dockerfile: docker/Dockerfile.web
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: image metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/${{ matrix.image }}
+          tags: |
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+            type=sha,format=long
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+
+      - name: build & load (for scanning)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          load: true
+          tags: ${{ matrix.image }}:scan
+          cache-from: type=gha,scope=${{ matrix.image }}
+          cache-to: type=gha,scope=${{ matrix.image }},mode=max
+          build-args: |
+            TYCHE_COMMIT_SHA=${{ github.sha }}
+            TYCHE_BUILD_TIME=${{ github.event.repository.updated_at }}
+
+      - name: image size
+        run: |
+          docker image inspect ${{ matrix.image }}:scan \
+            --format 'image: {{.RepoTags}}  size: {{.Size}} bytes  layers: {{len .RootFS.Layers}}'
+
+      - name: trivy vuln scan
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: ${{ matrix.image }}:scan
+          format: sarif
+          output: trivy-${{ matrix.image }}.sarif
+          severity: CRITICAL,HIGH
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+
+      - name: upload trivy SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-${{ matrix.image }}.sarif
+          category: trivy-${{ matrix.image }}
+
+      - name: grype scan (second opinion)
+        uses: anchore/scan-action@v6
+        with:
+          image: ${{ matrix.image }}:scan
+          fail-build: true
+          severity-cutoff: high
+          only-fixed: true
+
+      - name: dockerfile lint (hadolint)
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: ${{ matrix.dockerfile }}
+          ignore: DL3008,DL3018   # apt/apk version pin nags (we use distroless / alpine pins)
+
+      # Only push on main / tags / release runs (not PRs from forks).
+      - name: push to GHCR
+        if: github.event_name != 'pull_request'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=${{ matrix.image }}
+          build-args: |
+            TYCHE_COMMIT_SHA=${{ github.sha }}
+            TYCHE_BUILD_TIME=${{ github.event.repository.updated_at }}
+
+      - name: cosign install
+        if: github.event_name != 'pull_request'
+        uses: sigstore/cosign-installer@v3
+
+      - name: cosign keyless sign (GHA OIDC identity)
+        if: github.event_name != 'pull_request'
+        run: |
+          for tag in ${{ steps.meta.outputs.tags }}; do
+            cosign sign --yes "$tag"
+          done
+
+      - name: SBOM (cyclonedx) + attest
+        if: github.event_name != 'pull_request'
+        uses: anchore/sbom-action@v0
+        with:
+          image: ${{ env.REGISTRY }}/${{ env.IMAGE_OWNER }}/${{ matrix.image }}@${{ steps.meta.outputs.digest || 'latest' }}
+          format: cyclonedx-json
+          upload-artifact: true

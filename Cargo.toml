@@ -9,6 +9,7 @@ members = [
     "crates/tyche-wasm",
     "crates/tyche-py",
     "crates/tyche-cli",
+    "crates/tyche-api",
 ]
 
 [workspace.package]
@@ -30,11 +31,11 @@ thiserror = "1.0"
 anyhow = "1.0"
 
 # Async / runtime
-tokio = { version = "1.40", features = ["rt-multi-thread", "macros"] }
+tokio = { version = "1.40", features = ["rt-multi-thread", "macros", "signal", "net"] }
 
 # Tracing
 tracing = "0.1"
-tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt", "json"] }
 
 # Numerics / RNG
 rand = "0.8"

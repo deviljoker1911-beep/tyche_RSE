@@ -1,0 +1,74 @@
+# syntax=docker/dockerfile:1.7
+#
+# tyche-api production image.
+#
+# Multi-stage build mirroring Dockerfile.cli for cache locality. The final
+# image is a distroless cc with one binary, no shell, no package manager,
+# non-root, read-only fs at runtime.
+#
+# Target image: ~35 MB.
+# Build: docker build -f docker/Dockerfile.api -t tyche-api .
+
+ARG RUST_VERSION=1.85
+ARG TARGETPLATFORM
+
+FROM --platform=$BUILDPLATFORM rust:${RUST_VERSION}-bookworm AS builder
+
+WORKDIR /work
+
+COPY rust-toolchain.toml ./
+COPY Cargo.toml Cargo.lock ./
+COPY crates/tyche-types/Cargo.toml      crates/tyche-types/Cargo.toml
+COPY crates/tyche-crypto/Cargo.toml     crates/tyche-crypto/Cargo.toml
+COPY crates/tyche-sim/Cargo.toml        crates/tyche-sim/Cargo.toml
+COPY crates/tyche-attest/Cargo.toml     crates/tyche-attest/Cargo.toml
+COPY crates/tyche-fed/Cargo.toml        crates/tyche-fed/Cargo.toml
+COPY crates/tyche-wasm/Cargo.toml       crates/tyche-wasm/Cargo.toml
+COPY crates/tyche-py/Cargo.toml         crates/tyche-py/Cargo.toml
+COPY crates/tyche-cli/Cargo.toml        crates/tyche-cli/Cargo.toml
+COPY crates/tyche-api/Cargo.toml        crates/tyche-api/Cargo.toml
+
+RUN for c in tyche-types tyche-crypto tyche-sim tyche-attest tyche-fed \
+             tyche-wasm tyche-py tyche-cli tyche-api ; do \
+        mkdir -p crates/$c/src && echo "fn main() {}" > crates/$c/src/main.rs ; \
+        echo "// placeholder" > crates/$c/src/lib.rs ; \
+    done
+
+RUN --mount=type=cache,target=/usr/local/cargo/registry \
+    --mount=type=cache,target=/work/target \
+    cargo build --release --bin tyche-api --locked || true
+
+COPY crates ./crates
+COPY rustfmt.toml ./
+
+ARG TYCHE_COMMIT_SHA=unknown
+ARG TYCHE_BUILD_TIME=unknown
+ENV TYCHE_COMMIT_SHA=${TYCHE_COMMIT_SHA}
+ENV TYCHE_BUILD_TIME=${TYCHE_BUILD_TIME}
+
+RUN --mount=type=cache,target=/usr/local/cargo/registry \
+    --mount=type=cache,target=/work/target \
+    cargo build --release --bin tyche-api --locked && \
+    cp /work/target/release/tyche-api /tmp/tyche-api
+
+# ─── Runtime ────────────────────────────────────────────────────────────────
+FROM gcr.io/distroless/cc-debian12:nonroot AS runtime
+
+COPY --from=builder --chown=nonroot:nonroot /tmp/tyche-api /usr/local/bin/tyche-api
+
+EXPOSE 8080
+
+# The distroless image has no shell — Docker HEALTHCHECK doesn't work. K8s
+# liveness / readiness probes call /healthz and /readyz via HTTP instead;
+# see k8s manifests in M1D.
+ENV TYCHE_API_ADDR=0.0.0.0:8080
+ENV RUST_LOG=info
+
+LABEL org.opencontainers.image.title="tyche-api"
+LABEL org.opencontainers.image.description="Tyche federated risk simulator — HTTP API"
+LABEL org.opencontainers.image.licenses="Apache-2.0"
+LABEL org.opencontainers.image.source="https://github.com/deviljoker1911-beep/tyche_RSE"
+
+USER nonroot:nonroot
+
+ENTRYPOINT ["/usr/local/bin/tyche-api"]

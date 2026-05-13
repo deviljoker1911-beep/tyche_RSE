@@ -1,0 +1,9 @@
+apiVersion: 1
+providers:
+  - name: tyche-dashboards
+    type: file
+    disableDeletion: true
+    editable: false
+    updateIntervalSeconds: 30
+    options:
+      path: /etc/grafana/provisioning/dashboards/json
