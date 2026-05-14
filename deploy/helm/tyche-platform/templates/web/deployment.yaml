@@ -1,0 +1,76 @@
+{{- if .Values.web.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-web
+  labels:
+    {{- include "tyche.labels" . | nindent 4 }}
+    tyche.network/component: web
+spec:
+  {{- if not .Values.web.autoscaling.enabled }}
+  replicas: {{ .Values.web.replicaCount }}
+  {{- end }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      {{- include "tyche.selectorLabels" (dict "root" . "component" "web") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "tyche.labels" . | nindent 8 }}
+        tyche.network/component: web
+      annotations:
+        {{- toYaml .Values.common.podAnnotations | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "tyche.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.common.podSecurityContext | nindent 8 }}
+      topologySpreadConstraints:
+        {{- toYaml .Values.common.topologySpreadConstraints | nindent 8 }}
+      containers:
+        - name: web
+          image: {{ include "tyche.image" (dict "root" . "service" .Values.web) }}
+          imagePullPolicy: {{ .Values.web.image.pullPolicy }}
+          securityContext:
+            {{- toYaml .Values.common.securityContext | nindent 12 }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.web.service.port }}
+              protocol: TCP
+          env:
+            - name: TYCHE_ENV
+              value: {{ .Values.global.environment | quote }}
+            {{- range $k, $v := .Values.web.env }}
+            - name: {{ $k }}
+              value: {{ $v | quote }}
+            {{- end }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.web.probes.liveness.path }}
+              port: {{ .Values.web.probes.liveness.port }}
+            initialDelaySeconds: {{ .Values.web.probes.liveness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.web.probes.liveness.periodSeconds }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.web.probes.readiness.path }}
+              port: {{ .Values.web.probes.readiness.port }}
+            periodSeconds: {{ .Values.web.probes.readiness.periodSeconds }}
+          resources:
+            {{- toYaml .Values.web.resources | nindent 12 }}
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: cache
+              mountPath: /app/.next/cache
+      volumes:
+        - name: tmp
+          emptyDir:
+            sizeLimit: 64Mi
+        - name: cache
+          emptyDir:
+            sizeLimit: 256Mi
+{{- end }}

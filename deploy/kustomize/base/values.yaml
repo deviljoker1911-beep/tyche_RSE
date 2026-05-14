@@ -1,0 +1,4 @@
+global:
+  imageRegistry: ghcr.io/deviljoker1911-beep
+  environment: base
+  tenant: default

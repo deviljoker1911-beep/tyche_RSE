@@ -116,15 +116,7 @@ struct AggregateArgs {
 }
 
 fn main() -> Result<()> {
-    tracing_subscriber::fmt()
-        .with_env_filter(
-            tracing_subscriber::EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("info")),
-        )
-        .with_target(false)
-        .compact()
-        .init();
-
+    init_tracing();
     let cli = Cli::parse();
     match cli.cmd {
         Cmd::Simulate(args) => run_simulate(&args, cli.json),
@@ -132,6 +124,35 @@ fn main() -> Result<()> {
         Cmd::Verify(args) => run_verify(&args, cli.json),
         Cmd::FederateAggregate(args) => run_aggregate(&args, cli.json),
         Cmd::Bench => run_bench(cli.json),
+    }
+}
+
+/// Initialise tracing.
+///
+/// Defaults to a compact human-readable formatter on a TTY. Set
+/// `TYCHE_LOG_FORMAT=json` for structured logs suitable for ingestion by
+/// Loki / Datadog / Splunk. `RUST_LOG` controls the filter; default is
+/// `info,tyche=info`.
+fn init_tracing() {
+    use tracing_subscriber::EnvFilter;
+    let filter =
+        EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info,tyche=info"));
+    let use_json = std::env::var("TYCHE_LOG_FORMAT").as_deref() == Ok("json");
+    if use_json {
+        tracing_subscriber::fmt()
+            .with_env_filter(filter)
+            .with_target(true)
+            .json()
+            .with_current_span(true)
+            .with_span_list(false)
+            .flatten_event(true)
+            .init();
+    } else {
+        tracing_subscriber::fmt()
+            .with_env_filter(filter)
+            .with_target(false)
+            .compact()
+            .init();
     }
 }
 

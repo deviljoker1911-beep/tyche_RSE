@@ -1,0 +1,63 @@
+{
+  "title": "Tyche — API Golden Signals",
+  "uid": "tyche-api-golden",
+  "tags": ["tyche", "api", "slo"],
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "time": { "from": "now-6h", "to": "now" },
+  "templating": {
+    "list": [
+      { "name": "env", "type": "query", "query": "label_values(http_requests_total{tyche_component=\"api\"}, tyche_env)", "datasource": "Prometheus" },
+      { "name": "tenant", "type": "query", "query": "label_values(http_requests_total{tyche_component=\"api\", tyche_env=\"$env\"}, tyche_tenant)", "datasource": "Prometheus" }
+    ]
+  },
+  "panels": [
+    {
+      "type": "stat", "title": "Request rate (req/s)",
+      "datasource": "Prometheus", "gridPos": {"x":0,"y":0,"w":6,"h":4},
+      "targets": [{"expr":"sum(rate(http_requests_total{tyche_component=\"api\",tyche_env=\"$env\"}[5m]))","legendFormat":"rps"}]
+    },
+    {
+      "type": "stat", "title": "Error rate (%)",
+      "datasource": "Prometheus", "gridPos": {"x":6,"y":0,"w":6,"h":4},
+      "fieldConfig": { "defaults": { "unit": "percentunit",
+        "thresholds": { "mode":"absolute","steps":[
+          {"color":"green","value":0},{"color":"yellow","value":0.001},{"color":"red","value":0.005}
+        ]}}},
+      "targets": [{"expr":"sum(rate(http_requests_total{tyche_component=\"api\",tyche_env=\"$env\",status=~\"5..\"}[5m])) / sum(rate(http_requests_total{tyche_component=\"api\",tyche_env=\"$env\"}[5m]))"}]
+    },
+    {
+      "type": "stat", "title": "p99 latency (s)",
+      "datasource": "Prometheus", "gridPos": {"x":12,"y":0,"w":6,"h":4},
+      "targets": [{"expr":"histogram_quantile(0.99, sum by (le) (rate(http_request_duration_seconds_bucket{tyche_component=\"api\",tyche_env=\"$env\"}[5m])))"}]
+    },
+    {
+      "type": "stat", "title": "Replicas live",
+      "datasource": "Prometheus", "gridPos": {"x":18,"y":0,"w":6,"h":4},
+      "targets": [{"expr":"sum(up{tyche_component=\"api\",tyche_env=\"$env\"})"}]
+    },
+    {
+      "type": "timeseries", "title": "Request rate by route",
+      "datasource": "Prometheus", "gridPos": {"x":0,"y":4,"w":24,"h":7},
+      "targets": [{"expr":"sum by (route) (rate(http_requests_total{tyche_component=\"api\",tyche_env=\"$env\"}[5m]))","legendFormat":"{{route}}"}]
+    },
+    {
+      "type": "timeseries", "title": "Latency p50 / p95 / p99",
+      "datasource": "Prometheus", "gridPos": {"x":0,"y":11,"w":24,"h":7},
+      "targets": [
+        {"expr":"histogram_quantile(0.50, sum by (le) (rate(http_request_duration_seconds_bucket{tyche_component=\"api\",tyche_env=\"$env\"}[5m])))","legendFormat":"p50"},
+        {"expr":"histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket{tyche_component=\"api\",tyche_env=\"$env\"}[5m])))","legendFormat":"p95"},
+        {"expr":"histogram_quantile(0.99, sum by (le) (rate(http_request_duration_seconds_bucket{tyche_component=\"api\",tyche_env=\"$env\"}[5m])))","legendFormat":"p99"}
+      ]
+    },
+    {
+      "type": "timeseries", "title": "5xx + 4xx rate",
+      "datasource": "Prometheus", "gridPos": {"x":0,"y":18,"w":24,"h":7},
+      "targets": [
+        {"expr":"sum(rate(http_requests_total{tyche_component=\"api\",tyche_env=\"$env\",status=~\"5..\"}[5m]))","legendFormat":"5xx"},
+        {"expr":"sum(rate(http_requests_total{tyche_component=\"api\",tyche_env=\"$env\",status=~\"4..\"}[5m]))","legendFormat":"4xx"}
+      ]
+    }
+  ]
+}

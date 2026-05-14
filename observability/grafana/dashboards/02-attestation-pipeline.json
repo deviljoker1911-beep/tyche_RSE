@@ -1,0 +1,45 @@
+{
+  "title": "Tyche — Attestation Pipeline",
+  "uid": "tyche-attestation-pipeline",
+  "tags": ["tyche", "attestation", "slo"],
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "time": { "from": "now-24h", "to": "now" },
+  "panels": [
+    { "type": "stat", "title": "Records signed (last 1h)",
+      "datasource": "Prometheus", "gridPos": {"x":0,"y":0,"w":6,"h":4},
+      "targets": [{"expr":"sum(increase(tyche_attestations_signed_total[1h]))"}]
+    },
+    { "type": "stat", "title": "Last anchor age (s)",
+      "datasource": "Prometheus", "gridPos": {"x":6,"y":0,"w":6,"h":4},
+      "fieldConfig": {"defaults":{"unit":"s","thresholds":{"mode":"absolute","steps":[
+        {"color":"green","value":0},{"color":"yellow","value":1800},{"color":"red","value":7200}
+      ]}}},
+      "targets": [{"expr":"time() - tyche_last_anchor_unix_seconds"}]
+    },
+    { "type": "stat", "title": "Merkle batch size (last)",
+      "datasource": "Prometheus", "gridPos": {"x":12,"y":0,"w":6,"h":4},
+      "targets": [{"expr":"tyche_last_batch_size"}]
+    },
+    { "type": "stat", "title": "Anchor tx avg gas",
+      "datasource": "Prometheus", "gridPos": {"x":18,"y":0,"w":6,"h":4},
+      "targets": [{"expr":"avg(tyche_anchor_tx_gas_used)"}]
+    },
+    { "type": "timeseries", "title": "Records signed per minute",
+      "datasource": "Prometheus", "gridPos": {"x":0,"y":4,"w":12,"h":7},
+      "targets": [{"expr":"sum(rate(tyche_attestations_signed_total[1m])) * 60"}]
+    },
+    { "type": "timeseries", "title": "Anchor latency p50/p95",
+      "datasource": "Prometheus", "gridPos": {"x":12,"y":4,"w":12,"h":7},
+      "targets": [
+        {"expr":"histogram_quantile(0.50, sum by (le) (rate(tyche_anchor_duration_seconds_bucket[5m])))","legendFormat":"p50"},
+        {"expr":"histogram_quantile(0.95, sum by (le) (rate(tyche_anchor_duration_seconds_bucket[5m])))","legendFormat":"p95"}
+      ]
+    },
+    { "type": "timeseries", "title": "Verification failures",
+      "datasource": "Prometheus", "gridPos": {"x":0,"y":11,"w":24,"h":7},
+      "targets": [{"expr":"sum(rate(tyche_verification_failures_total[5m]))"}]
+    }
+  ]
+}

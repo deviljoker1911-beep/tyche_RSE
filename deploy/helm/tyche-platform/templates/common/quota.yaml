@@ -1,0 +1,45 @@
+# Namespace-level guardrails. Stops a runaway service from consuming the
+# whole node pool and lets the platform team size cell capacity.
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: {{ .Release.Name }}-quota
+  labels:
+    {{- include "tyche.labels" . | nindent 4 }}
+spec:
+  hard:
+    requests.cpu: "16"
+    requests.memory: 32Gi
+    limits.cpu: "32"
+    limits.memory: 64Gi
+    pods: "100"
+    services: "20"
+    persistentvolumeclaims: "10"
+    secrets: "50"
+    configmaps: "50"
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: {{ .Release.Name }}-limits
+  labels:
+    {{- include "tyche.labels" . | nindent 4 }}
+spec:
+  limits:
+    - type: Container
+      default:
+        cpu: 500m
+        memory: 512Mi
+      defaultRequest:
+        cpu: 50m
+        memory: 64Mi
+      max:
+        cpu: "4"
+        memory: 4Gi
+      min:
+        cpu: 10m
+        memory: 32Mi
+    - type: Pod
+      max:
+        cpu: "8"
+        memory: 8Gi

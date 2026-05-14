@@ -1,0 +1,36 @@
+{
+  "title": "Tyche — Infra Cost",
+  "uid": "tyche-infra-cost",
+  "tags": ["tyche", "cost"],
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "5m",
+  "time": { "from": "now-30d", "to": "now" },
+  "panels": [
+    { "type": "stat", "title": "Monthly cluster cost ($)",
+      "datasource": "Prometheus", "gridPos": {"x":0,"y":0,"w":8,"h":5},
+      "targets": [{"expr":"sum(opencost_namespace_monthly_cost{namespace=~\"tyche-.*\"})"}]
+    },
+    { "type": "stat", "title": "Cost / 1k attestations",
+      "datasource": "Prometheus", "gridPos": {"x":8,"y":0,"w":8,"h":5},
+      "fieldConfig": {"defaults":{"unit":"currencyUSD","decimals":3}},
+      "targets": [{"expr":"sum(opencost_namespace_monthly_cost{namespace=~\"tyche-.*\"}) / (sum(increase(tyche_attestations_signed_total[30d])) / 1000)"}]
+    },
+    { "type": "stat", "title": "Cluster CPU utilisation",
+      "datasource": "Prometheus", "gridPos": {"x":16,"y":0,"w":8,"h":5},
+      "fieldConfig": {"defaults":{"unit":"percentunit"}},
+      "targets": [{"expr":"sum(rate(container_cpu_usage_seconds_total{namespace=~\"tyche-.*\"}[5m])) / sum(kube_node_status_capacity{resource=\"cpu\"})"}]
+    },
+    { "type": "timeseries", "title": "Cost by service",
+      "datasource": "Prometheus", "gridPos": {"x":0,"y":5,"w":12,"h":7},
+      "targets": [{"expr":"sum by (deployment) (opencost_deployment_monthly_cost{namespace=~\"tyche-.*\"})","legendFormat":"{{deployment}}"}]
+    },
+    { "type": "timeseries", "title": "Memory headroom",
+      "datasource": "Prometheus", "gridPos": {"x":12,"y":5,"w":12,"h":7},
+      "targets": [
+        {"expr":"sum(kube_node_status_capacity{resource=\"memory\"})","legendFormat":"capacity"},
+        {"expr":"sum(container_memory_working_set_bytes{namespace=~\"tyche-.*\"})","legendFormat":"used"}
+      ]
+    }
+  ]
+}

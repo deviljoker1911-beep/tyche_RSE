@@ -1,0 +1,38 @@
+apiVersion: v2
+name: tyche-platform
+description: |
+  Tyche risk-attestation platform.
+
+  Bundles the API, web dashboard, and attestation batcher services with the
+  pod-security baseline, network policies, HPA / PDB, and the observability
+  scrape configs expected by the cluster's Prometheus stack.
+
+  This chart is **not** a Helm umbrella around third-party DBs or queues —
+  PostgreSQL, ClickHouse, Redis, S3 are managed externally (RDS, ClickHouse
+  Cloud, ElastiCache, S3 Object Lock) and wired in via External Secrets +
+  ConfigMaps. Operators bringing their own stack point the secrets at their
+  own endpoints.
+
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+kubeVersion: ">=1.29.0-0"
+home: https://github.com/deviljoker1911-beep/tyche_RSE
+sources:
+  - https://github.com/deviljoker1911-beep/tyche_RSE
+maintainers:
+  - name: Tyche Authors
+    email: security@tyche.network
+keywords:
+  - risk
+  - attestation
+  - private-credit
+  - merkle
+  - ed25519
+annotations:
+  artifacthub.io/license: Apache-2.0
+  artifacthub.io/links: |
+    - name: Source
+      url: https://github.com/deviljoker1911-beep/tyche_RSE
+    - name: Security Policy
+      url: https://github.com/deviljoker1911-beep/tyche_RSE/blob/main/docs/SECURITY.md

@@ -1,0 +1,65 @@
+{{- if .Values.batcher.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-batcher
+  labels:
+    {{- include "tyche.labels" . | nindent 4 }}
+    tyche.network/component: batcher
+spec:
+  # Singleton: rely on Lease-based leader election for failover (M1H).
+  replicas: {{ .Values.batcher.replicaCount }}
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      {{- include "tyche.selectorLabels" (dict "root" . "component" "batcher") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "tyche.labels" . | nindent 8 }}
+        tyche.network/component: batcher
+      annotations:
+        {{- toYaml .Values.common.podAnnotations | nindent 8 }}
+        checksum/secret-refs: "{{ tpl (toYaml .Values.batcher.secrets) . | sha256sum }}"
+    spec:
+      serviceAccountName: {{ include "tyche.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.common.podSecurityContext | nindent 8 }}
+      containers:
+        - name: batcher
+          image: {{ include "tyche.image" (dict "root" . "service" .Values.batcher) }}
+          imagePullPolicy: {{ .Values.batcher.image.pullPolicy }}
+          securityContext:
+            {{- toYaml .Values.common.securityContext | nindent 12 }}
+          {{- with .Values.batcher.command }}
+          command:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.batcher.args }}
+          args:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          env:
+            - name: TYCHE_ENV
+              value: {{ .Values.global.environment | quote }}
+            {{- range $k, $v := .Values.batcher.env }}
+            - name: {{ $k }}
+              value: {{ $v | quote }}
+            {{- end }}
+            - name: ANCHOR_CHAIN_RPC
+              valueFrom:
+                secretKeyRef: { name: {{ .Values.batcher.secrets.rpcUrl }}, key: url }
+            - name: TYCHE_PUBLISHER_KEY
+              valueFrom:
+                secretKeyRef: { name: {{ .Values.batcher.secrets.publisherKey }}, key: ed25519 }
+          resources:
+            {{- toYaml .Values.batcher.resources | nindent 12 }}
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir:
+            sizeLimit: 64Mi
+{{- end }}

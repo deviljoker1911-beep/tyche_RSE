@@ -1,0 +1,15 @@
+# Pod Security Standards labels on the namespace itself enforce the
+# `restricted` policy even if a future deployment forgets its
+# securityContext. Belt-and-braces.
+{{- if .Values.global.createNamespace }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Release.Namespace }}
+  labels:
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/warn: restricted
+    pod-security.kubernetes.io/enforce-version: latest
+    tyche.network/env: {{ .Values.global.environment }}
+{{- end }}

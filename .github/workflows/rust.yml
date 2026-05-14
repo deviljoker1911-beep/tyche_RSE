@@ -7,36 +7,108 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
-  RUSTFLAGS: "-D warnings"
+  CARGO_INCREMENTAL: 0          # CI builds — disable incremental for faster cold builds + smaller cache
+  CARGO_NET_RETRY: 10
+  RUSTUP_MAX_RETRIES: 10
+  RUSTFLAGS: "-D warnings -C debuginfo=line-tables-only"
+  # sccache speeds up cold builds by caching at the LLVM IR level.
+  SCCACHE_GHA_ENABLED: "true"
+  RUSTC_WRAPPER: "sccache"
+
+concurrency:
+  group: rust-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   fmt:
-    name: cargo fmt
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@master
         with:
+          toolchain: 1.85.1  # pinned via rust-toolchain.toml; double-check here
           components: rustfmt
       - run: cargo fmt --all -- --check
 
   clippy:
-    name: cargo clippy
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: mozilla-actions/sccache-action@v0.0.6
+      - uses: dtolnay/rust-toolchain@master
         with:
+          toolchain: 1.85.1
           components: clippy
       - uses: Swatinem/rust-cache@v2
-      - run: cargo clippy --workspace --all-targets -- -D warnings
+      - run: cargo clippy --workspace --all-targets --locked -- -D warnings
 
   test:
-    name: cargo test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: mozilla-actions/sccache-action@v0.0.6
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: 1.85.1
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo test --workspace --all-targets --locked --no-fail-fast
+        env:
+          # Property tests run at full strength in CI; TYCHE_PROPTEST_FAST is
+          # for local iteration only.
+          TYCHE_PROPTEST_FAST: ""
+      - run: cargo bench --workspace --locked --no-run
+
+  coverage:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: mozilla-actions/sccache-action@v0.0.6
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: 1.85.1
+          components: llvm-tools-preview
       - uses: Swatinem/rust-cache@v2
-      - run: cargo test --workspace --all-targets
-      - run: cargo bench --workspace --no-run
+      - uses: taiki-e/install-action@v2
+        with: { tool: cargo-llvm-cov@0.6.21 }
+      - name: coverage
+        run: |
+          cargo llvm-cov --workspace --locked --lcov --output-path lcov.info
+          cargo llvm-cov --workspace --locked --summary-only | tee coverage-summary.txt
+      - uses: codecov/codecov-action@v4
+        if: env.CODECOV_TOKEN != ''
+        with:
+          files: lcov.info
+          token: ${{ secrets.CODECOV_TOKEN }}
+      - uses: actions/upload-artifact@v4
+        with: { name: coverage-summary, path: coverage-summary.txt }
+
+  # Reproducibility verifier: builds the CLI twice and asserts identical SHA-256.
+  reproducible-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with: { toolchain: 1.85.1 }
+      - name: build A
+        run: |
+          cargo build --release --locked --bin tyche
+          shasum -a 256 target/release/tyche | tee /tmp/hash-a
+      - name: clean & build B
+        run: |
+          cargo clean -p tyche-cli
+          cargo build --release --locked --bin tyche
+          shasum -a 256 target/release/tyche | tee /tmp/hash-b
+      - name: compare
+        run: |
+          a=$(awk '{print $1}' /tmp/hash-a)
+          b=$(awk '{print $1}' /tmp/hash-b)
+          echo "A: $a"
+          echo "B: $b"
+          if [ "$a" != "$b" ]; then
+            echo "::error::non-reproducible: $a != $b"
+            exit 1
+          fi

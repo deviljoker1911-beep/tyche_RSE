@@ -1,0 +1,18 @@
+{
+  "extends": ["@commitlint/config-conventional"],
+  "rules": {
+    "header-max-length":  [2, "always", 100],
+    "body-max-line-length": [2, "always", 100],
+    "type-enum": [2, "always", [
+      "feat", "fix", "perf", "refactor", "docs", "test", "build", "ci",
+      "chore", "style", "revert"
+    ]],
+    "scope-enum": [2, "always", [
+      "types", "crypto", "sim", "attest", "fed", "cli", "wasm", "py",
+      "contracts", "web", "ci", "infra", "deploy", "docs", "data", "release",
+      "deps", "security", "observability", "release-please"
+    ]],
+    "subject-case": [2, "always", "lower-case"],
+    "footer-leading-blank": [2, "always"]
+  }
+}

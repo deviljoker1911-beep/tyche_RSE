@@ -1,0 +1,50 @@
+# External Secrets Operator scaffolding. The ESO controller pulls from AWS
+# Secrets Manager (or Vault / GCP SM) into a K8s Secret that the workloads
+# above mount. The actual secret values live in AWS — never in git, never in
+# values.yaml.
+#
+# This file is rendered only if ESO CRDs exist; the controlling annotation
+# at the SecretStore level scopes IRSA to a specific role per namespace.
+apiVersion: external-secrets.io/v1beta1
+kind: SecretStore
+metadata:
+  name: {{ .Release.Name }}-aws-secrets
+  labels:
+    {{- include "tyche.labels" . | nindent 4 }}
+spec:
+  provider:
+    aws:
+      service: SecretsManager
+      region: {{ .Values.global.region | default "eu-west-1" }}
+      auth:
+        jwt:
+          serviceAccountRef:
+            name: {{ include "tyche.serviceAccountName" . }}
+---
+{{- range $name, $kind := dict
+      "tyche-api-signing-key"     "ed25519"
+      "tyche-api-database-url"    "url"
+      "tyche-api-redis-url"       "url"
+      "tyche-batcher-publisher-key" "ed25519"
+      "tyche-batcher-rpc-url"     "url" }}
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: {{ $name }}
+  labels:
+    {{- include "tyche.labels" $ | nindent 4 }}
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    name: {{ $.Release.Name }}-aws-secrets
+    kind: SecretStore
+  target:
+    name: {{ $name }}
+    creationPolicy: Owner
+  data:
+    - secretKey: {{ $kind }}
+      remoteRef:
+        key: tyche/{{ $.Values.global.environment }}/{{ $name }}
+        property: {{ $kind }}
+---
+{{- end }}

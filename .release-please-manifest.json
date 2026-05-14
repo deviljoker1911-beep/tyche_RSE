@@ -1,0 +1,12 @@
+{
+  "crates/tyche-types":  "0.1.0",
+  "crates/tyche-crypto": "0.1.0",
+  "crates/tyche-sim":    "0.1.0",
+  "crates/tyche-attest": "0.1.0",
+  "crates/tyche-fed":    "0.1.0",
+  "crates/tyche-cli":    "0.1.0",
+  "crates/tyche-wasm":   "0.1.0",
+  "crates/tyche-py":     "0.1.0",
+  "apps/web":            "0.1.0",
+  "contracts":           "0.1.0"
+}

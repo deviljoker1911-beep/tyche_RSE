@@ -1,0 +1,99 @@
+{{- if .Values.networkPolicy.enabled }}
+# Default-deny baseline. Any traffic that doesn't match a specific allow
+# below is dropped at the CNI layer (Cilium / Calico).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ .Release.Name }}-default-deny
+  labels:
+    {{- include "tyche.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/part-of: tyche
+  policyTypes: [Ingress, Egress]
+---
+# Ingress: allow gateway → api/web, observability → all (scrape).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ .Release.Name }}-allow-ingress
+  labels:
+    {{- include "tyche.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/part-of: tyche
+  policyTypes: [Ingress]
+  ingress:
+    {{- if .Values.networkPolicy.ingress.fromGateway }}
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-gateway
+      ports:
+        - { protocol: TCP, port: 8080 }
+        - { protocol: TCP, port: 3000 }
+    {{- end }}
+    {{- if .Values.networkPolicy.ingress.fromObservability }}
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: observability
+      ports:
+        - { protocol: TCP, port: 9090 }
+    {{- end }}
+    # Intra-namespace: api can reach itself and the batcher.
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/part-of: tyche
+---
+# Egress: DNS, database, redis, external RPC, AWS secrets endpoints.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ .Release.Name }}-allow-egress
+  labels:
+    {{- include "tyche.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/part-of: tyche
+  policyTypes: [Egress]
+  egress:
+    {{- if .Values.networkPolicy.egress.toDNS }}
+    - to:
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - { protocol: UDP, port: 53 }
+        - { protocol: TCP, port: 53 }
+    {{- end }}
+    {{- if .Values.networkPolicy.egress.toDatabase }}
+    # PostgreSQL + ClickHouse + Redis are external (RDS / ClickHouse Cloud /
+    # ElastiCache). Egress is to the VPC endpoint CIDR injected by kustomize.
+    - to:
+        - ipBlock:
+            cidr: 10.0.0.0/8
+      ports:
+        - { protocol: TCP, port: 5432 }
+        - { protocol: TCP, port: 6379 }
+        - { protocol: TCP, port: 9000 }
+    {{- end }}
+    {{- if .Values.networkPolicy.egress.toExternalRPC }}
+    # Anchor chain RPC. Specific host pinning happens at gateway, here we
+    # allow generic egress to 443.
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              # Block well-known cloud metadata endpoints.
+              - 169.254.169.254/32
+              - 169.254.170.0/24
+      ports:
+        - { protocol: TCP, port: 443 }
+    {{- end }}
+{{- end }}

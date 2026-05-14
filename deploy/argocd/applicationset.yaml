@@ -1,0 +1,94 @@
+# Fan out one ArgoCD Application per environment from a single generator.
+# Add an env by adding an item to `generators.list.elements`.
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: tyche-platform
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - list:
+        elements:
+          - env: dev
+            namespace: tyche-dev
+            cluster: in-cluster
+            revision: main
+            replicas: "1"
+          - env: staging
+            namespace: tyche-staging
+            cluster: in-cluster
+            revision: main
+            replicas: "2"
+          - env: prod
+            namespace: tyche-prod
+            cluster: in-cluster
+            revision: HEAD~0  # promotion gates this; never auto-tracks main
+            replicas: "6"
+  template:
+    metadata:
+      name: tyche-{{.env}}
+      labels:
+        tyche.network/env: "{{.env}}"
+    spec:
+      project: tyche
+      source:
+        repoURL: https://github.com/deviljoker1911-beep/tyche_RSE
+        targetRevision: "{{.revision}}"
+        path: deploy/kustomize/overlays/{{.env}}
+      destination:
+        name: "{{.cluster}}"
+        namespace: "{{.namespace}}"
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ApplyOutOfSyncOnly=true
+          - PrunePropagationPolicy=foreground
+          - ServerSideApply=true
+        retry:
+          limit: 5
+          backoff:
+            duration: 5s
+            factor: 2
+            maxDuration: 5m
+      revisionHistoryLimit: 10
+      ignoreDifferences:
+        # HPA-managed replicas drift constantly; ignore.
+        - group: apps
+          kind: Deployment
+          jsonPointers: [/spec/replicas]
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: tyche
+  namespace: argocd
+spec:
+  description: Tyche risk-attestation platform
+  sourceRepos:
+    - https://github.com/deviljoker1911-beep/tyche_RSE
+    - oci://ghcr.io/deviljoker1911-beep/charts
+  destinations:
+    - namespace: "tyche-*"
+      server: "*"
+  clusterResourceWhitelist:
+    - group: ""
+      kind: Namespace
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"
+  roles:
+    - name: deploy-staging
+      policies:
+        - p, proj:tyche:deploy-staging, applications, sync, tyche/tyche-staging, allow
+      groups:
+        - tyche:platform-engineering
+    - name: deploy-prod
+      policies:
+        - p, proj:tyche:deploy-prod, applications, sync, tyche/tyche-prod, allow
+      groups:
+        - tyche:release-managers

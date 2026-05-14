@@ -1,0 +1,25 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "release-type": "rust",
+  "include-component-in-tag": true,
+  "include-v-in-tag": true,
+  "bump-minor-pre-major": true,
+  "bump-patch-for-minor-pre-major": true,
+  "draft": false,
+  "prerelease": false,
+  "packages": {
+    "crates/tyche-types":  { "release-type": "rust", "component": "tyche-types"  },
+    "crates/tyche-crypto": { "release-type": "rust", "component": "tyche-crypto" },
+    "crates/tyche-sim":    { "release-type": "rust", "component": "tyche-sim"    },
+    "crates/tyche-attest": { "release-type": "rust", "component": "tyche-attest" },
+    "crates/tyche-fed":    { "release-type": "rust", "component": "tyche-fed"    },
+    "crates/tyche-cli":    { "release-type": "rust", "component": "tyche-cli"    },
+    "crates/tyche-wasm":   { "release-type": "rust", "component": "tyche-wasm"   },
+    "crates/tyche-py":     { "release-type": "rust", "component": "tyche-py"     },
+    "apps/web":            { "release-type": "node", "component": "tyche-web"    },
+    "contracts":           { "release-type": "simple", "component": "tyche-contracts" }
+  },
+  "plugins": [
+    { "type": "cargo-workspace", "merge": true }
+  ]
+}

@@ -1,0 +1,82 @@
+{{- if .Values.monitoring.serviceMonitor.enabled }}
+# kube-prometheus-stack picks this up automatically. ServiceMonitor lives in
+# the same namespace as the workload; the stack must allow cross-namespace
+# discovery (`serviceMonitorSelectorNilUsesHelmValues: false`).
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ .Release.Name }}-api
+  labels:
+    {{- include "tyche.labels" . | nindent 4 }}
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      tyche.network/component: api
+  endpoints:
+    - port: metrics
+      interval: {{ .Values.monitoring.serviceMonitor.interval }}
+      scrapeTimeout: {{ .Values.monitoring.serviceMonitor.scrapeTimeout }}
+      path: /metrics
+{{- end }}
+---
+{{- if .Values.monitoring.prometheusRules.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ .Release.Name }}-slo
+  labels:
+    {{- include "tyche.labels" . | nindent 4 }}
+    release: prometheus
+spec:
+  groups:
+    - name: tyche-api.slo
+      interval: 30s
+      rules:
+        - alert: TycheApiHighErrorRate
+          expr: |
+            (
+              sum(rate(http_requests_total{tyche_component="api",status=~"5.."}[5m]))
+              /
+              sum(rate(http_requests_total{tyche_component="api"}[5m]))
+            ) > 0.005
+          for: 10m
+          labels:
+            severity: page
+            slo: api-availability
+          annotations:
+            summary: "Tyche API 5xx rate > 0.5% over 10m"
+            runbook_url: "https://docs.tyche.network/runbooks/api-error-rate"
+        - alert: TycheApiHighLatency
+          expr: |
+            histogram_quantile(
+              0.99,
+              sum by (le) (rate(http_request_duration_seconds_bucket{tyche_component="api"}[5m]))
+            ) > 5
+          for: 15m
+          labels:
+            severity: page
+            slo: api-latency
+          annotations:
+            summary: "API p99 latency > 5s over 15m"
+            runbook_url: "https://docs.tyche.network/runbooks/api-latency"
+        - alert: TycheAttestationAnchorLag
+          expr: time() - tyche_last_anchor_unix_seconds > 7200
+          for: 10m
+          labels:
+            severity: page
+            slo: anchor-freshness
+          annotations:
+            summary: "No Merkle root anchored on chain in 2+ hours"
+            runbook_url: "https://docs.tyche.network/runbooks/anchor-lag"
+        - alert: TycheBatcherDown
+          expr: |
+            absent(up{tyche_component="batcher"} == 1)
+          for: 5m
+          labels:
+            severity: page
+          annotations:
+            summary: "Attestation batcher singleton not reporting"
+            runbook_url: "https://docs.tyche.network/runbooks/batcher-down"
+{{- end }}

@@ -1,0 +1,45 @@
+{
+  "title": "Tyche — Chain Anchoring",
+  "uid": "tyche-chain-anchoring",
+  "tags": ["tyche", "chain"],
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "1m",
+  "time": { "from": "now-7d", "to": "now" },
+  "panels": [
+    { "type": "stat", "title": "Roots published (24h)",
+      "datasource": "Prometheus", "gridPos": {"x":0,"y":0,"w":6,"h":4},
+      "targets": [{"expr":"sum(increase(tyche_roots_published_total[24h]))"}]
+    },
+    { "type": "stat", "title": "Failed publish (24h)",
+      "datasource": "Prometheus", "gridPos": {"x":6,"y":0,"w":6,"h":4},
+      "fieldConfig": {"defaults":{"thresholds":{"mode":"absolute","steps":[
+        {"color":"green","value":0},{"color":"yellow","value":1},{"color":"red","value":3}
+      ]}}},
+      "targets": [{"expr":"sum(increase(tyche_root_publish_failed_total[24h]))"}]
+    },
+    { "type": "stat", "title": "Gas spent / day (gwei)",
+      "datasource": "Prometheus", "gridPos": {"x":12,"y":0,"w":6,"h":4},
+      "targets": [{"expr":"sum(increase(tyche_anchor_tx_gas_used[24h]) * tyche_gas_price_gwei) / 1e9"}]
+    },
+    { "type": "stat", "title": "Chain RPC latency p95",
+      "datasource": "Prometheus", "gridPos": {"x":18,"y":0,"w":6,"h":4},
+      "targets": [{"expr":"histogram_quantile(0.95, sum by (le) (rate(tyche_chain_rpc_duration_seconds_bucket[5m])))"}]
+    },
+    { "type": "timeseries", "title": "Anchor cadence",
+      "datasource": "Prometheus", "gridPos": {"x":0,"y":4,"w":24,"h":7},
+      "targets": [{"expr":"sum(rate(tyche_roots_published_total[1m])) * 60","legendFormat":"per minute"}]
+    },
+    { "type": "timeseries", "title": "Inclusion-proof verifications",
+      "datasource": "Prometheus", "gridPos": {"x":0,"y":11,"w":12,"h":7},
+      "targets": [
+        {"expr":"sum(rate(tyche_inclusion_verifications_total[5m]))","legendFormat":"ok"},
+        {"expr":"sum(rate(tyche_inclusion_verifications_failed_total[5m]))","legendFormat":"fail"}
+      ]
+    },
+    { "type": "timeseries", "title": "Pending records in queue",
+      "datasource": "Prometheus", "gridPos": {"x":12,"y":11,"w":12,"h":7},
+      "targets": [{"expr":"tyche_pending_records"}]
+    }
+  ]
+}
