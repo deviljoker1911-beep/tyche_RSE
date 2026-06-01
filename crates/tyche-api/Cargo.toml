@@ -12,6 +12,10 @@ readme = "README.md"
 [lints]
 workspace = true
 
+[lib]
+name = "tyche_api"
+path = "src/lib.rs"
+
 [[bin]]
 name = "tyche-api"
 path = "src/main.rs"
@@ -22,7 +26,7 @@ tyche-sim = { workspace = true }
 tyche-attest = { workspace = true }
 tyche-fed = { workspace = true }
 axum = { workspace = true }
-tokio = { workspace = true }
+tokio = { workspace = true, features = ["time"] }
 serde = { workspace = true }
 serde_json = { workspace = true }
 ed25519-dalek = { workspace = true }
@@ -32,6 +36,11 @@ anyhow = { workspace = true }
 thiserror = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
-tower-http = { version = "0.6", features = ["trace", "timeout", "limit", "request-id"] }
-tower = { version = "0.5", features = ["limit", "load-shed"] }
+tower = { version = "0.5", features = ["limit", "load-shed", "util", "timeout"] }
+tower-http = { version = "0.6", features = ["trace", "request-id", "util"] }
 http = "1.1"
+metrics = "0.24"
+metrics-exporter-prometheus = { version = "0.16", default-features = false }
+
+[dev-dependencies]
+http-body-util = "0.1"
